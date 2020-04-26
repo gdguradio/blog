@@ -18,6 +18,8 @@
       <div class="col-lg-8 col-md-10 mx-auto">
 
 
+
+
         
         <?php if (isset($post) && count($post) > 0) { ?>
             <?php foreach($post AS $key => $value){?>

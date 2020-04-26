@@ -6,9 +6,12 @@ use \CodeIgniter\Database\ConnectionInterface;
 class PostModel extends Model
 {
 
-    protected $table      = 'post_details';
-    protected $primaryKey = 'id';
+    // protected $table      = 'post_details';
+    protected $table      = 'table_view';
+    protected $db;
 
+    protected $primaryKey = 'id';
+    
     protected $returnType = 'array';
 
     //true value will look for deleted_at column add later 
@@ -27,4 +30,18 @@ class PostModel extends Model
     protected $skipValidation     = false;
     
 
+    /**
+     * Only need to create the View so the pagination can access it via
+     * $this->table (protected $table = 'table_view')
+     */
+    public function create_view() {
+        $this->db = \Config\Database::connect();
+
+        $sql = "CREATE OR REPLACE VIEW table_view AS ";
+        // Whatever your SQL needs to be goes here
+        $sql .= "SELECT A.id,A.bannerHeader,A.bannerSubHeader,A.dteCreatedDate,B.strFullName FROM post_details A 
+            JOIN users B on A.user_id = B.id ORDER BY A.dteCreatedDate DESC";
+        // echo $sql;
+        $query = $this->db->query($sql);
+    }
 }
