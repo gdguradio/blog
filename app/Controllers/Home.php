@@ -62,7 +62,8 @@ class Home extends BaseController
 		$data['name'] = $this->session->get('name');
 		$data['email'] = $this->session->get('email');
 		$data['role'] = $this->session->get('role');
-		
+		$data['userID'] = $this->session->get('userID');
+
 		$this->viewRender('home',$data);
 
 	}

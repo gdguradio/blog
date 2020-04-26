@@ -13,6 +13,7 @@
     var $formLogin = $('#login-form');
     var $formLost = $('#lost-form');
     var $formRegister = $('#register-form');
+    var $formChange = $('#change-form');
     var $divForms = $('#div-forms');
     var $modalAnimateTime = 300;
     var $msgAnimateTime = 150;
@@ -52,10 +53,11 @@
                                 console.log(data.role)
                                 if(data.role == 'Admin'){
                                     // $("header nav").prepend('<a href="'+$siteurl+'/Register/logout" class="alogout">Logout</a>')
-                                    $("#navbarResponsive").append('<ul class="navbar-nav ml-auto"><li class="nav-item"><li class="nav-item"><a class="nav-link" href="<?=site_url("/")?>Home</a></li><li class="nav-item"><a class="nav-link" href="about.html">About</a></li><li class="nav-item"><a class="nav-link" href="'+$siteurl+'/postlist">Post List</a></li><li class="nav-item"><a class="nav-link" href="'+$siteurl+'/newpost">Create Post</a></li><li class="nav-item"><a href="'+$siteurl+'/Register" class="nav-link acreg" >Check Register</a></li><li class="nav-item"><a href="'+$siteurl+'/Register/logout" class="nav-link alogout">Logout</a></li></ul>')
+                                    $("#navbarResponsive").append('<ul class="navbar-nav ml-auto"><li class="nav-item"><li class="nav-item"><a class="nav-link" href="'+$siteurl+'/">Home</a></li><li class="nav-item"><a class="nav-link" href="'+$siteurl+'/postlist">Post List</a></li><li class="nav-item"><a class="nav-link" href="'+$siteurl+'/newpost">Create Post</a></li><li class="nav-item"><a href="#" id="change_btn" >Change Password</a></li><li class="nav-item"><a href="'+$siteurl+'/Register" class="nav-link acreg" >Check Register</a></li><li class="nav-item"><a href="'+$siteurl+'/Register/logout" class="nav-link alogout">Logout</a></li></ul>')
+                                    
 
                                 }else{
-                                    $("#navbarResponsive").append('<ul class="navbar-nav ml-auto"><li class="nav-item"><li class="nav-item"><a class="nav-link" href="<?=site_url("/")?>Home</a></li><li class="nav-item"><a class="nav-link" href="about.html">About</a></li><li class="nav-item"><a class="nav-link" href="'+$siteurl+'/postlist">Post List</a></li><li class="nav-item"><a class="nav-link" href="'+$siteurl+'/newpost">Create Post</a></li><li class="nav-item"><a href="'+$siteurl+'/Register/logout" class="nav-link alogout">Logout</a></li></ul>')
+                                    $("#navbarResponsive").append('<ul class="navbar-nav ml-auto"><li class="nav-item"><li class="nav-item"><a class="nav-link" href="'+$siteurl+'/">Home</a></li><li class="nav-item"><a class="nav-link" href="'+$siteurl+'/postlist">Post List</a></li><li class="nav-item"><a class="nav-link" href="'+$siteurl+'/newpost">Create Post</a></li><li class="nav-item"><a href="#" id="change_btn" >Change Password</a></li><li class="nav-item"><a href="'+$siteurl+'/Register/logout" class="nav-link alogout">Logout</a></li></ul>')
                                 }
                                 $("header nav a[href='#menu']").text(data.name)
                               }, $msgShowTime);
@@ -70,13 +72,70 @@
                 // }
                 return false;
                 break;
-            case "lost-form":
+            case "change-form":
+                var $change_id=$('#change_id').val();
+                var $change_npassword=$('#change_npassword').val();
+                var $change_cpassword=$('#change_cpassword').val();
+                var formData = new FormData();
+        
+                formData.append('id',$change_id);
+                formData.append('npassword',$change_npassword);
+                formData.append('cpassword',$change_cpassword);
+                $.ajax({
+                    type:'POST',
+                    url: $siteurl + '/Register/changePassword' ,
+                    dataType:"json",
+                    data:formData,
+                    async: true,
+                    cache: false,
+                    contentType: false,
+                    enctype: 'multipart/form-data',
+                    processData: false,
+                    success:function(data)
+                    {
+                        if(data.errstatus == 'true'){
+                            msgChange($('#div-change-msg'), $('#icon-change-msg'), $('#text-change-msg'), "error", "glyphicon-remove", data.msg);
+                        }else{
+                            msgChange($('#div-change-msg'), $('#icon-change-msg'), $('#text-change-msg'), "success", "glyphicon-ok", data.msg);
+                            setTimeout(function() {
+                                $('#login-modal').modal('toggle');
+                              }, $msgShowTime);
+                        }   
+                    }
+                });
+                return false;
+                break;
+                case "lost-form":
                 var $ls_email=$('#lost_email').val();
-                if ($ls_email == "ERROR") {
-                    msgChange($('#div-lost-msg'), $('#icon-lost-msg'), $('#text-lost-msg'), "error", "glyphicon-remove", "Send error");
-                } else {
-                    msgChange($('#div-lost-msg'), $('#icon-lost-msg'), $('#text-lost-msg'), "success", "glyphicon-ok", "Send OK");
-                }
+                var formData = new FormData();
+        
+        
+                formData.append('strEmail',$ls_email);
+                $.ajax({
+                    type:'POST',
+                    url: $siteurl + '/Register/lostPassword' ,
+                    dataType:"json",
+                    data:formData,
+                    async: true,
+                    cache: false,
+                    contentType: false,
+                    enctype: 'multipart/form-data',
+                    processData: false,
+                    success:function(data)
+                    {
+                        if(data.errstatus == 'true'){
+                            msgChange($('#div-lost-msg'), $('#icon-lost-msg'), $('#text-lost-msg'), "error", "glyphicon-remove", data.msg);
+                        }else{
+                            msgChange($('#div-lost-msg'), $('#icon-lost-msg'), $('#text-lost-msg'), "success", "glyphicon-ok", data.msg);
+                            
+                        }   
+                    }
+                });
+                // if ($ls_email == "ERROR") {
+                //     msgChange($('#div-lost-msg'), $('#icon-lost-msg'), $('#text-lost-msg'), "error", "glyphicon-remove", "Send error");
+                // } else {
+                //     msgChange($('#div-lost-msg'), $('#icon-lost-msg'), $('#text-lost-msg'), "success", "glyphicon-ok", "Send OK");
+                // }
                 return false;
                 break;
             case "register-form":
@@ -134,12 +193,20 @@
     $('#lost_login_btn').click( function () { modalAnimate($formLost, $formLogin); });
     $('#lost_register_btn').click( function () { modalAnimate($formLost, $formRegister); });
     $('#register_lost_btn').click( function () { modalAnimate($formRegister, $formLost); });
-    
+    $('#navbarResponsive').on( 'click','#change_btn',function (e) { 
+        e.preventDefault();
+        e.stopPropagation(); 
+        $('#login-modal').modal('show')
+        $('#login-modal').attr('style','opacity:1 !important')
+        modalAnimate($formLogin, $formChange); 
+    });
+
     
 
     function modalAnimate ($oldForm, $newForm) {
-        var $oldH = $oldForm.height();
-        var $newH = $newForm.height();
+        console.log($newForm)
+        var $oldH = $oldForm.height() > 0 ? $oldForm.height() : '350px';
+        var $newH = $newForm.height()> 0 ? $newForm.height() : '350px';
         $divForms.css("height",$oldH);
         $oldForm.fadeToggle($modalAnimateTime, function(){
             $divForms.animate({height: $newH}, $modalAnimateTime, function(){

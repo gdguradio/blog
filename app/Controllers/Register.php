@@ -1,6 +1,7 @@
 <?php namespace App\Controllers;
 use App\Models\RegisterModel;
 use CodeIgniter\Database\Query;
+use App\Controllers\Email;
 
 
 class Register extends BaseController
@@ -12,7 +13,8 @@ class Register extends BaseController
         $this->validation =  \Config\Services::validation();
         $this->db = \Config\Database::connect();
         $this->session = \Config\Services::session();
-        
+        // $this->load->library('../controllers/whathever');
+
     }
 
 
@@ -21,12 +23,14 @@ class Register extends BaseController
     public function index()
 	{
         $this->session = \Config\Services::session();
-        if(!($this->session->has('id'))){
+        if(!($this->session->has('userID'))){
             return redirect()->route('/');
         }
 		$data['name'] = $this->session->get('name');
 		$data['email'] = $this->session->get('email');
-		$data['role'] = $this->session->get('role');
+        $data['role'] = $this->session->get('role');
+        $data['userID'] = $this->session->get('userID');
+        
         $this->viewRender('newregister',$data);
 
 	}
@@ -73,7 +77,7 @@ class Register extends BaseController
                         'email'  => $result->getResult()[0]->strEmail,
                         'role'  => $result->getResult()[0]->strRoleName,
                         'access'  => $result->getResult()[0]->strRoleAccess,
-                        'id'  => $result->getResult()[0]->id
+                        'userID'  => $result->getResult()[0]->id
                 ];
                 $this->session->set($userdata);
                 
@@ -162,6 +166,91 @@ class Register extends BaseController
         }else
         {
             return json_encode(array('errstatus' => 'true' , 'msg' => 'No new request!'));
+        }
+    }
+    public function changePassword(){
+        $request = \Config\Services::request();
+        $id = $request->getPost()['id'];
+        $npassword = $request->getPost()['npassword'];
+        $cpassword = $request->getPost()['cpassword'];
+
+
+        $data = [
+            'npassword' => $_POST['npassword'],
+            'cpassword'  => $_POST['cpassword'],
+            
+        ];
+        $this->validation->run($data, 'changepassword');
+        $errors = $this->validation->getErrors();
+        if(count($errors) > 0){
+            foreach($errors AS $key => $value){
+                return json_encode(array('errstatus' => 'true' , 'msg' => $value));
+            }
+            return json_encode(array('errstatus' => 'true' , 'msg' => $errors[0]));
+        }
+        $hashpassword = password_hash(ltrim(rtrim($cpassword)), PASSWORD_DEFAULT);
+        $updatedata = ['strPassWord' => $hashpassword];
+        $builder = $this->db->table('users');
+        $result = $builder->update($updatedata,['WHERE id = ' . $id]);
+        if ($result === false)
+        {   
+            return json_encode(array('errstatus' => 'true' , 'msg' => 'Change Password Failed!'));
+        }else
+        {
+            return json_encode(array('errstatus' => 'false' , 'msg' => 'Change Password Successful!'));
+        }
+    }
+    public function lostPassword(){
+
+        $Email = new Email;
+        $registerModel = new RegisterModel;
+        $request = \Config\Services::request();
+        $strEmail = $request->getPost()['strEmail'];
+
+
+        
+        $builder = $this->db->table('users A');
+
+        $builder->where('strEmail', $strEmail);
+        $builder->where('bitActiveFlag', 1);
+        $builder->where('bitDeleteFlag', 0);
+        $builder->select('strFullName,strUserName,strRoleName');
+        $builder->join('user_role B', 'A.id = B.user_id','inner');
+        $builder->join('roles C', 'B.role_id = C.id','inner');
+        
+
+
+        $result = $builder->get();
+        
+
+        if (count($result->getResult()) === 1) {   
+            $name = $result->getResult()[0]->strFullName;
+            $user = $result->getResult()[0]->strUserName;
+            $role = $result->getResult()[0]->strRoleName;
+
+            $this->db->transBegin();
+            
+            $newpassword = $registerModel->random_password(6);
+            $hashpassword = password_hash(ltrim(rtrim($newpassword)), PASSWORD_DEFAULT);
+            $updateemail = "update users set strPassWord = '".$hashpassword."' where strEmail = :strEmail:";
+            
+            $this->db->query($updateemail, [
+                    'strEmail'     => $strEmail
+            ]);
+            
+            if ($this->db->transStatus() === FALSE) {
+                $this->db->transRollback();
+                return json_encode(array('errstatus' => 'true' , 'msg' => 'Something went wrong!'));
+            } else {
+                $resultemail = $Email->htmlmail($user,$name,$strEmail,$role,$newpassword,'Password Reset');
+                if ($resultemail['errstatus'] == 'false') {
+                    $this->db->transCommit();
+                    return json_encode(array('errstatus' => 'false' , 'msg' => 'Successfully reset password. New password sent to email')); 
+                } else {
+                    $this->db->transRollback();
+                    return json_encode(array('errstatus' => 'true' , 'msg' => 'Email Sending Failed!')); 
+                }   
+            }
         }
     }
     public function store(){//Request $request

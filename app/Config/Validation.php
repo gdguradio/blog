@@ -106,4 +106,18 @@ class Validation
             'required'    => 'Post Body Image cannot be empty.',
         ]
 	];
+
+	public $changepassword = [
+		'npassword'     =>  ['label' => 'New Password', 'rules' => 'required|alpha_numeric|min_length[6]'],
+        'cpassword' => ['label' => 'Confirm Password','rules' =>'required|matches[npassword]'],
+        
+	];
+	public $changepassword_errors = [
+		'npassword' => [
+            'required'    => 'New Password cannot be empty.',
+		],
+		'cpassword' => [
+            'required'    => 'Confirm Password cannot be empty.',
+        ]
+	];
 }

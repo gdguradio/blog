@@ -14,12 +14,12 @@ class Email extends BaseController
         $this->session = \Config\Services::session();
         
     }
-    public function htmlmail(){
+    public function htmlmail($user,$name,$emailaddress,$role,$npass,$action) {
 
         $this->session = \Config\Services::session();
-        if(!($this->session->has('id'))){
-            return redirect()->route('/');
-        }
+        // if(!($this->session->has('id'))){
+        //     return redirect()->route('/');
+        // }
         $email = \Config\Services::email();
         $config['protocol'] = 'smtp';
         $config['SMTPHost'] = 'ssl://smtp.gmail.com';
@@ -29,14 +29,16 @@ class Email extends BaseController
         $config['mailType'] = 'html';
 
         $email->initialize($config);
-        $email->setFrom('test6sample3@gmail.com', 'Your Name');
-        $email->setTo('gdguradio@gmail.com');
+        $email->setFrom('test6sample3@gmail.com', 'Test Sample');
+        $email->setTo($emailaddress);
         // $email->setCC('another@another-example.com');
         // $email->setBCC('them@their-example.com');
         $data = array(
-            'name'  => 'Martin'
+            'name'  => $name,
+            'role'  => $role,
+            'npass' => $npass
         );
-        $email->setSubject('Email Test');
+        $email->setSubject($action);
         $mesg = view('emails/email',$data, ['cache' => 60, 'cache_name' => 'my_cached_view']);
 
         $email->setMessage($mesg);
@@ -49,11 +51,10 @@ class Email extends BaseController
         if (! $email->send())
         {
                 // Generate error
-            return json_encode(array('errstatus' => 'true' , 'msg' => 'Email Sending Failed!'));
+            return array('errstatus' => 'true' );
         }else
         {
-            
-            return json_encode(array('errstatus' => 'false' , 'msg' => 'Email Sending Successful!'));
+            return array('errstatus' => 'false' );
 
         }
     }

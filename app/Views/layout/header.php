@@ -51,20 +51,22 @@
         <ul class="navbar-nav ml-auto">
           <?php if (!isset($name)) {?>
             <li class="nav-item">
-              <a href="#" class="alogin" role="button" data-toggle="modal" data-form="login"data-target="#login-modal">Login</a>
+              <a href="#" class="alogin" role="button" data-toggle="modal" data-form="login" data-target="#login-modal">Login</a>
             </li>
           <?php } else {?>
             <li class="nav-item">
               <a class="nav-link" href="<?=site_url('/')?>">Home</a>
             </li>
             <li class="nav-item">
-              <a class="nav-link" href="about.html">About</a>
-            </li>
-            <li class="nav-item">
               <a class="nav-link" href="<?=site_url('/postlist')?>">Post List</a>
             </li>
             <li class="nav-item">
               <a class="nav-link" href="<?=site_url('/newpost')?>">Create Post</a>
+            </li>
+            <li class="nav-item">
+            <!-- <a class="nav-link" id="change_btn" href="#">Change Password</a> -->
+
+              <a href="#" id="change_btn" class="alogin" role="button" data-toggle="modal" data-form="change" data-target="#login-modal">Change Password</a>
             </li>
             <?php if (isset($role) && $role === 'Admin') {?>
               <li class="nav-item">
@@ -120,6 +122,26 @@
                 </form>
                 <!-- End # Login Form -->
                 
+                <!-- Begin | Change Password Form -->
+                <form id="change-form" style="display:none;">
+                    <div class="modal-body">
+                        <div id="div-change-msg">
+                            <div id="icon-change-msg" class="glyphicon glyphicon-chevron-right"></div>
+                            <span id="text-change-msg">Type your passwords.</span>
+                        </div>
+                        <input id="change_id" class="form-control" type="hidden" value="<?=$userID?>">
+                        <input id="change_npassword" class="form-control" type="password" placeholder="New Password" required>
+                        <input id="change_cpassword" class="form-control" type="password" placeholder="Confirm Password" required>
+
+                    </div>
+                    <div class="modal-footer">
+                        <div>
+                            <button type="submit" class="btn btn-primary btn-lg btn-block">Send</button>
+                        </div>
+                    </div>
+                </form>
+                <!-- End | Change Password Form -->
+
                 <!-- Begin | Lost Password Form -->
                 <form id="lost-form" style="display:none;">
                     <div class="modal-body">

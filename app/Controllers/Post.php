@@ -22,18 +22,18 @@ class Post extends BaseController
     public function postlist()
 	{
         $this->session = \Config\Services::session();
-        if(!($this->session->has('id'))){
+        if(!($this->session->has('userID'))){
             return redirect()->route('/');
         }
 		$data['name'] = $this->session->get('name');
 		$data['email'] = $this->session->get('email');
         $data['role'] = $this->session->get('role');
-        $data['id'] = $this->session->get('id');
+        $data['userID'] = $this->session->get('userID');
         $this->viewRender('postlist',$data);
 
     }
     public function updatepost($id){
-        if(!($this->session->has('id'))){
+        if(!($this->session->has('userID'))){
             return redirect()->route('/');
         }
         $builder = $this->db->table('post_details A');
@@ -53,13 +53,16 @@ class Post extends BaseController
                     'bodyFrstPara'  => $result->getResult()[0]->bodyFrstPara,
                     'bodyScndPara'  => $result->getResult()[0]->bodyScndPara,
                     'bannerimage'  => $result->getResult()[0]->bannerimage,
-                    'bodyimage'  => $result->getResult()[0]->bodyimage
+                    'bodyimage'  => $result->getResult()[0]->bodyimage,
+                    'postid'  => $result->getResult()[0]->id
                     
             ];
             $data['name'] = $this->session->get('name');
             $data['email'] = $this->session->get('email');
             $data['role'] = $this->session->get('role');
-            $data['postid'] = $this->session->get('id');
+            $data['userID'] = $this->session->get('userID');
+
+            // $data['postid'] = $this->session->get('id');
             return $this->viewRender('post',$data);
 
         }
@@ -71,13 +74,13 @@ class Post extends BaseController
     public function index()
 	{
         $this->session = \Config\Services::session();
-        if(!($this->session->has('id'))){
+        if(!($this->session->has('userID'))){
             return redirect()->route('/');
         }
 		$data['name'] = $this->session->get('name');
 		$data['email'] = $this->session->get('email');
         $data['role'] = $this->session->get('role');
-        $data['id'] = $this->session->get('id');
+        $data['userID'] = $this->session->get('userID');
         $this->viewRender('post',$data);
 
     }
@@ -110,7 +113,7 @@ class Post extends BaseController
         $builder = $this->db->table('post_details');
         
         $data = [
-            'user_id' => $this->session->get('id'),
+            'user_id' => $this->session->get('userID'),
             'bannerHeader' => $this->request->getPost()['bannerHeader'],
             'bannerSubHeader'  => $this->request->getPost()['bannerSubHeader'],
             // 'bannermeta'  => $this->request->getPost()['bannermeta'],
@@ -173,7 +176,7 @@ class Post extends BaseController
         $builder = $this->db->table('post_details');
         
         $data = [
-            'user_id' => $this->session->get('id'),
+            'user_id' => $this->session->get('userID'),
             'bannerHeader' => $this->request->getPost()['bannerHeader'],
             'bannerSubHeader'  => $this->request->getPost()['bannerSubHeader'],
             'bodyFrstHeading'  => $this->request->getPost()['bodyFrstHeading'],
@@ -216,9 +219,9 @@ class Post extends BaseController
     }
     public function viewpost($id = null){
         $this->session = \Config\Services::session();
-        if(!($this->session->has('id'))){
-            return redirect()->route('/');
-        }
+        // if(!($this->session->has('id'))){
+        //     return redirect()->route('/');
+        // }
         $builder = $this->db->table('post_details A');
         if($id != null){
             $builder->where('A.id', $id);
@@ -252,6 +255,7 @@ class Post extends BaseController
             $data['name'] = $this->session->get('name');
             $data['email'] = $this->session->get('email');
             $data['role'] = $this->session->get('role');
+            $data['userID'] = $this->session->get('userID');
             return $this->viewRender('viewpost',$data);
 
         }else
@@ -261,7 +265,7 @@ class Post extends BaseController
     }
     public function getAllPost(){
         $this->session = \Config\Services::session();
-        $user_id  = $this->session->get('id');
+        $user_id  = $this->session->get('userID');
         $builder = $this->db->table('post_details');
         $builder->where('user_id', $user_id);
         $builder->select('id,bannerHeader,dteCreatedDate');
