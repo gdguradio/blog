@@ -9,9 +9,12 @@ class Register extends BaseController
     protected $session = null; // use protected instead as recommended
     protected $validation = null; // use protected instead as recommended
     protected $db = null; // use protected instead as recommended
+    protected $request = null; // use protected instead as recommended
+
     public function __construct() {
         $this->validation =  \Config\Services::validation();
         $this->db = \Config\Database::connect();
+        $this->request = \Config\Services::request();
         $this->session = \Config\Services::session();
         // $this->load->library('../controllers/whathever');
 
@@ -26,6 +29,14 @@ class Register extends BaseController
         if(!($this->session->has('userID'))){
             return redirect()->route('/');
         }
+
+        $pager = \Config\Services::pager();
+		$registerModel = new \App\Models\RegisterModel();
+
+        $data = [
+            'users' => $registerModel->paginate(10),
+            'pager' => $registerModel->pager
+        ];
 		$data['name'] = $this->session->get('name');
 		$data['email'] = $this->session->get('email');
         $data['role'] = $this->session->get('role');
@@ -33,21 +44,12 @@ class Register extends BaseController
         
         $this->viewRender('newregister',$data);
 
-	}
-    public function logout(){
-        // session_destroy();
-        $this->session->destroy();
-        // $this->session->stop();
-
-        return redirect()->to('/');
     }
-	public function retrieve(){
+    public function show(){
         $registerModel = new RegisterModel;
         $builder = $this->db->table('users A');
         $strUserName  = $_POST['strUserName'];
-        $strPassWord = password_hash(ltrim(rtrim($_POST['strPassWord'])), PASSWORD_DEFAULT);//$registerModel->hashPassword(ltrim(rtrim($_POST['strPassWord'])));
-        // $result = $builder->insert($data);
-
+        $strPassWord = password_hash(ltrim(rtrim($_POST['strPassWord'])), PASSWORD_DEFAULT);
         $builder->where('strUserName', $strUserName);
         $builder->where('bitActiveFlag', 1);
         $builder->where('bitDeleteFlag', 0);
@@ -77,15 +79,16 @@ class Register extends BaseController
                         'email'  => $result->getResult()[0]->strEmail,
                         'role'  => $result->getResult()[0]->strRoleName,
                         'access'  => $result->getResult()[0]->strRoleAccess,
-                        'userID'  => $result->getResult()[0]->id
+                        'userID'  => $result->getResult()[0]->id,
+                        'signedIn'  => true
                 ];
                 $this->session->set($userdata);
                 
-                return json_encode(array('errstatus' => 'false' , 'msg' => 'Logged in Successfully!' , 
-                                    'name' => $result->getResult()[0]->strFullName, 
-                                    'email' => $result->getResult()[0]->strEmail, 
-                                    'role' => $result->getResult()[0]->strRoleName
-                                ));
+                // return json_encode(array('errstatus' => 'false' , 'msg' => 'Logged in Successfully!' , 
+                //                     'name' => $result->getResult()[0]->strFullName, 
+                //                     'email' => $result->getResult()[0]->strEmail, 
+                //                     'role' => $result->getResult()[0]->strRoleName
+                //                 ));
 
             }else
             {
@@ -98,6 +101,86 @@ class Register extends BaseController
         }
 
     }
+    public function store()
+    {
+        $registerModel = new RegisterModel;
+        
+        // $this->session = \Config\Services::session();
+        
+        $builder = $this->db->table('users');
+
+        
+
+        $data = [
+            'strEmail' => $_POST['strEmail'],
+            'strFullName'  => $_POST['strFullName'],
+            'strUserName'  => $_POST['strUserName'],
+            'intAge'  => $_POST['intAge'],
+            'strPassWord'  => $_POST['strPassWord'],
+        ];
+        $this->validation->run($data, 'signup');
+        $errors = $this->validation->getErrors();
+        if(count($errors) > 0){
+            // $errorstring = '<ol>';
+            foreach($errors AS $key => $value){
+                return json_encode(array('errstatus' => 'true' , 'msg' => $value));
+                // $errorstring .= "<li>". $value . "</li>";
+            }
+            // $errorstring .= '</ol>';
+            // // We pass (only) session data to the View
+            // $this->session->setFlashdata('errmsg', json_encode(array('errstatus' => 'true' , 'msg' => $errorstring)));
+            // $page['errmsg'] = $this->session->getFlashdata('errmsg');
+            // return view('pages/register',$page);
+            // return redirect()->to('/register');
+            return json_encode(array('errstatus' => 'true' , 'msg' => $errors[0]));
+        }
+        $data['strPassWord'] = password_hash(ltrim(rtrim($_POST['strPassWord'])), PASSWORD_DEFAULT);//$registerModel->hashPassword(ltrim(rtrim($_POST['strPassWord'])));
+        $result = $builder->insert($data);
+        if ($result === false)
+        {   
+            // We set some data
+            // $this->session->setFlashdata('errmsg', json_encode(array('errstatus' => 'true' , 'msg' => 'Insert Failed!')));
+            // $this->session->errmsg = json_encode(array('errstatus' => 'true' , 'msg' => 'Insert Failed!'));
+
+            // // We pass (only) session data to the View
+            // // return view('pages/register', $this->session->get());
+            // $page['errmsg'] = $this->session->getFlashdata('errmsg');
+            // return view('pages/register',$page);
+            return json_encode(array('errstatus' => 'true' , 'msg' => 'Insert Failed!'));
+        }else
+        {
+            // We set some data
+            // $this->session->errmsg = json_encode(array('errstatus' => 'false' , 'msg' => 'Insert Successful!'));
+            // $this->session->setFlashdata('errmsg', json_encode(array('errstatus' => 'false' , 'msg' => 'Insert Successful!')));
+            // // We pass (only) session data to the View
+            // // return view('pages/register', $this->session->get());
+            // $page['errmsg'] = $this->session->getFlashdata('errmsg');
+            // return view('pages/register',$page);
+            // return redirect()->to('/login');
+            return json_encode(array('errstatus' => 'false' , 'msg' => 'Insert Successful!'));
+        }
+        // $request->validate([
+        //     'name' => 'required|max:255',
+        // ]);
+
+        // $player = Player::create($request->all());
+
+        // return (new PlayerResource($player))
+        //         ->response()
+        //         ->setStatusCode(201);
+    }
+
+
+
+
+    public function logout(){
+        // session_destroy();
+        $this->session->destroy();
+        // $this->session->stop();
+
+        return redirect()->to('/');
+    }
+	
     public function deleteuser(){
 
         $user_id = $_POST['user_id'];
@@ -253,74 +336,7 @@ class Register extends BaseController
             }
         }
     }
-    public function store(){//Request $request
-        
-        $registerModel = new RegisterModel;
-        
-        // $this->session = \Config\Services::session();
-        
-        $builder = $this->db->table('users');
-
-        
-
-        $data = [
-            'strEmail' => $_POST['strEmail'],
-            'strFullName'  => $_POST['strFullName'],
-            'strUserName'  => $_POST['strUserName'],
-            'intAge'  => $_POST['intAge'],
-            'strPassWord'  => $_POST['strPassWord'],
-        ];
-        $this->validation->run($data, 'signup');
-        $errors = $this->validation->getErrors();
-        if(count($errors) > 0){
-            // $errorstring = '<ol>';
-            foreach($errors AS $key => $value){
-                return json_encode(array('errstatus' => 'true' , 'msg' => $value));
-                // $errorstring .= "<li>". $value . "</li>";
-            }
-            // $errorstring .= '</ol>';
-            // // We pass (only) session data to the View
-            // $this->session->setFlashdata('errmsg', json_encode(array('errstatus' => 'true' , 'msg' => $errorstring)));
-            // $page['errmsg'] = $this->session->getFlashdata('errmsg');
-            // return view('pages/register',$page);
-            // return redirect()->to('/register');
-            return json_encode(array('errstatus' => 'true' , 'msg' => $errors[0]));
-        }
-        $data['strPassWord'] = password_hash(ltrim(rtrim($_POST['strPassWord'])), PASSWORD_DEFAULT);//$registerModel->hashPassword(ltrim(rtrim($_POST['strPassWord'])));
-        $result = $builder->insert($data);
-        if ($result === false)
-        {   
-            // We set some data
-            // $this->session->setFlashdata('errmsg', json_encode(array('errstatus' => 'true' , 'msg' => 'Insert Failed!')));
-            // $this->session->errmsg = json_encode(array('errstatus' => 'true' , 'msg' => 'Insert Failed!'));
-
-            // // We pass (only) session data to the View
-            // // return view('pages/register', $this->session->get());
-            // $page['errmsg'] = $this->session->getFlashdata('errmsg');
-            // return view('pages/register',$page);
-            return json_encode(array('errstatus' => 'true' , 'msg' => 'Insert Failed!'));
-        }else
-        {
-            // We set some data
-            // $this->session->errmsg = json_encode(array('errstatus' => 'false' , 'msg' => 'Insert Successful!'));
-            // $this->session->setFlashdata('errmsg', json_encode(array('errstatus' => 'false' , 'msg' => 'Insert Successful!')));
-            // // We pass (only) session data to the View
-            // // return view('pages/register', $this->session->get());
-            // $page['errmsg'] = $this->session->getFlashdata('errmsg');
-            // return view('pages/register',$page);
-            // return redirect()->to('/login');
-            return json_encode(array('errstatus' => 'false' , 'msg' => 'Insert Successful!'));
-        }
-        // $request->validate([
-        //     'name' => 'required|max:255',
-        // ]);
-
-        // $player = Player::create($request->all());
-
-        // return (new PlayerResource($player))
-        //         ->response()
-        //         ->setStatusCode(201);
-    }
+    
 
     //--------------------------------------------------------------------
     

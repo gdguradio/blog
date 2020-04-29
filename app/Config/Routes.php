@@ -31,13 +31,21 @@ $routes->setAutoRoute(true);
 // We get a performance increase by specifying the default
 // route since we don't have to scan directories.
 $routes->get('/', 'Home::index');
-$routes->get('/newpost', 'Post::index');
-$routes->get('/postlist', 'Post::postlist');
-// $routes->get('post/(:id)', 'Post::updatepost/$1');
-$routes->get('/post/(:num)', 'Post::updatepost/$1');
 
-// $routes->add('post/(:id)', 'Post::updatepost/$1');
-// $routes->add('post/(:id)', 'Post::updatepost/$1', ['as' => 'updatePost']);
+
+$routes->add('users', 'Register::index', ['as' => 'users']);
+$routes->post('user', 'Register::show', ['as' => 'user']);
+
+
+
+$routes->add('post/(:num)', 'Post::updatepost/$1', ['as' => 'updatePost']);
+$routes->add('postlist', 'Post::postlist', ['as' => 'postList']);
+$routes->add('postnew', 'Post::index');
+
+// $routes->get('post/(:segment)',      'Post::updatepost/$1', ['as' => 'updatePost']);
+
+// $routes->add('post/(:num)', 'Post::deletepost/$1', ['as' => 'deletepost']);
+
 
 // $routes->get('/viewpost/{id}', 'Post::viewpost');
 

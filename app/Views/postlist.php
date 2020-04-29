@@ -8,7 +8,7 @@
 
 <header class="masthead" style="background-image: url('<?php echo base_url('assets/img/menubar.png'); ?>');height:50px !important;">
     <div class="overlay"></div>
-    <div class="container">
+    <!-- <div class="container">
         <div class="row">
         <div class="col-lg-8 col-md-10 mx-auto">
             <div class="site-heading">
@@ -17,7 +17,7 @@
             </div>
         </div>
         </div>
-    </div>
+    </div> -->
 </header>
 <section class="wrapper">
 	<div class="inner">
@@ -34,22 +34,36 @@
 					<th></th>
 				</tr>
 			</thead>
-			<tbody>
 				
+			<tbody>
+				<?php if(isset($post) && count($post) > 0) :?>
+					<?php foreach($post AS $key => $value) :?>
+						<tr>
+							<td><?=$value['bannerHeader']?></td>
+							<td><?=$value['dteCreatedDate']?></td>
+							<td><a href="<?= route_to('updatePost', $value['id']) ?>" style="color:white !important" class="btn btn-primary postlist">Update</a></td>
+							<!-- <td><a href="<?= route_to('deletepost', $value['id']) ?>" style="color:white !important" class="btn btn-danger postlist">Delete</a></td> -->
+						</tr>
+					<?php endforeach ?>
+				<?php endif ?>
 			</tbody>
 			<tfoot>
+				<?php if (isset($post) && count($post) > 0) { ?>
+					<?= $pager->simpleLinks('post','simplestyled') ?>
+				<?php }?>
+
 			</tfoot>
 		</table>
 		</div>
 	</div>
 </section>
-<script src="<?php echo base_url('assets/js/jquery.dataTables.min.js'); ?>"></script>
-<script src="<?php echo base_url('assets/js/dataTables.bootstrap.min.js'); ?>"></script>
+<!-- <script src="<?php echo base_url('assets/js/jquery.dataTables.min.js'); ?>"></script>
+<script src="<?php echo base_url('assets/js/dataTables.bootstrap.min.js'); ?>"></script> -->
 <!-- <script src="<?php echo base_url('assets/jquery/jquery.min.js'); ?>"></script>
   <script src="<?php echo base_url('assets/bootstrap/js/bootstrap.bundle.min.js'); ?>"></script> -->
 <script>
 	$(document).ready(function() {
-		postlist();
+		// postlist();
 		// $('#postlisttable').DataTable();
 		$("#postlisttable").on('click','button.postlist',postlistaction);
 
@@ -138,9 +152,10 @@
 
 							// data[i]["delete"] = '<a  href="<?=site_url('Register/deleteuser/')?>'+ data[i].id +'"class="btn btn-danger btn-lg delete" data-sys_id="'+ data[i].id +'"  >Delete</a>';
 							// data[i]["admin"] = '<a  href="<?=site_url('Register/updaterole/1/')?>'+ data[i].id +'" class="btn btn-info btn-lg confirm" data-sys_id="'+ data[i].id +'" >Confirm as Admin</a>';
-							// data[i]["confirm"] = '<a  href="<?=route_to('Post::updatePost', 1) ?>"  class="btn btn-primary btn-lg confirm" data-sys_id="'+ data[i].id +'">Confirm as User</a>';
+							// data[i]["confirm"] = '<a href="<?= route_to('updatepost', 15) ?>">View Gallery</a> class="btn btn-primary btn-lg confirm" data-sys_id="'+ data[i].id +'">Confirm as User</a>';
 							data[i]["delete"] = '<button style="color:white !important" class="btn btn-danger postlist" data-sys_id="'+ data[i].id +'" data-action="delete">Delete</button>';
-							data[i]["confirm"] = '<a href="<?=site_url('/post')?>/'+ data[i].id +'" style="color:white !important" class="btn btn-primary postlist" data-sys_id="'+ data[i].id +'" data-action="confirm">Update</a>';
+							data[i]["confirm"] = '<a href="<?= route_to('updatepost', 15) ?>/'+ data[i].id +'" style="color:white !important" class="btn btn-primary postlist" data-sys_id="'+ data[i].id +'" data-action="confirm">Update</a>';
+							// data[i]["confirm"] = '<a href="<?=site_url('/post')?>/'+ data[i].id +'" style="color:white !important" class="btn btn-primary postlist" data-sys_id="'+ data[i].id +'" data-action="confirm">Update</a>';
 
 							// data[i]["confirm"] = '<button style="color:white !important" class="btn btn-info postlist" data-sys_id="'+ data[i].id +'" data-action="confirm">Update</button>';
 						}

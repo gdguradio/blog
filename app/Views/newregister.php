@@ -8,7 +8,7 @@
 
 <header class="masthead" style="background-image: url('<?php echo base_url('assets/img/menubar.png'); ?>');height:50px !important;">
     <div class="overlay"></div>
-    <div class="container">
+    <!-- <div class="container">
         <div class="row">
         <div class="col-lg-8 col-md-10 mx-auto">
             <div class="site-heading">
@@ -17,7 +17,7 @@
             </div>
         </div>
         </div>
-    </div>
+    </div> -->
 </header>
 <section class="wrapper">
 	<div class="inner">
@@ -38,9 +38,24 @@
 				</tr>
 			</thead>
 			<tbody>
-				
+				<?php if(isset($users) && count($users) > 0) :?>
+					<?php foreach($users AS $key => $value) :?>
+						<tr>
+							<td> <?=$value['strFullName']?> </td>
+							<td> <?=$value['intAge']?> </td>
+							<td> <?=$value['strUserName']?> </td>
+							<td> <?=$value['strEmail']?> </td>
+							<td><button style="color:white !important" class="btn btn-info newregister" data-sys_id="'+ data[i].id +'" data-role_id="1" data-action="confirm">Confirm as Admin</button></td>
+							<td><button style="color:white !important" class="btn btn-primary newregister" data-sys_id="'+ data[i].id +'" data-role_id="2" data-action="confirm">Confirm as User</button></td>
+							<td><button style="color:white !important" class="btn btn-danger newregister" data-sys_id="'+ data[i].id +'" data-action="delete">Delete</button></td>
+						</tr>
+					<?php endforeach ?>
+				<?php endif ?>
 			</tbody>
 			<tfoot>
+				<?php if (isset($users) && count($users) > 0) { ?>
+					<?= $pager->simpleLinks('users','simplestyled') ?>
+				<?php }?>
 			</tfoot>
 		</table>
 		</div>
@@ -102,11 +117,8 @@
 </div>
 </div>
 <!-- END # MODAL LOGIN -->
-<script src="<?php echo base_url('assets/js/jquery.dataTables.min.js'); ?>"></script>
-<script src="<?php echo base_url('assets/js/dataTables.bootstrap.min.js'); ?>"></script>
 <script>
 	$(document).ready(function() {
-		newRequest();
 		// $('#newrequesttable').DataTable();
 		$("#newrequesttable").on('click','button.newregister',NewRequest);
 
@@ -178,39 +190,6 @@
         }
 
 
-		}
-		function newRequest(){
-			var $siteurl = site_url;
-			$.fn.dataTable.ext.errMode = 'none'; 
-			$('#newrequesttable').DataTable( {
-				destroy: true,
-				"ajax": {
-					"url": $siteurl + '/Register/getAllRequest',
-					"type":"POST",
-					"dataSrc":function(data){
-						console.log(data)
-						for(var i = 0; i < data.length; i++)
-						{
-							// data[i]["delete"] = '<a  href="<?=site_url('Register/deleteuser/')?>'+ data[i].id +'"class="btn btn-danger btn-lg delete" data-sys_id="'+ data[i].id +'"  >Delete</a>';
-							// data[i]["admin"] = '<a  href="<?=site_url('Register/updaterole/1/')?>'+ data[i].id +'" class="btn btn-info btn-lg confirm" data-role_id="1"data-sys_id="'+ data[i].id +'" >Confirm as Admin</a>';
-							// data[i]["user"] = '<a  href="<?=site_url('Register/updaterole/2/')?>'+ data[i].id +'"  class="btn btn-primary btn-lg confirm" data-role_id="1"data-sys_id="'+ data[i].id +'">Confirm as User</a>';
-							data[i]["delete"] = '<button style="color:white !important" class="btn btn-danger newregister" data-sys_id="'+ data[i].id +'" data-action="delete">Delete</button>';
-							data[i]["admin"] = '<button style="color:white !important" class="btn btn-info newregister" data-sys_id="'+ data[i].id +'" data-role_id="1" data-action="confirm">Confirm as Admin</button>';
-							data[i]["user"] = '<button style="color:white !important" class="btn btn-primary newregister" data-sys_id="'+ data[i].id +'" data-role_id="2" data-action="confirm">Confirm as User</button>';
-						}
-						return data;
-					} 
-				},
-				"columns": [
-					{ "data": "strFullName" },
-					{ "data": "intAge" },
-					{ "data": "strUserName" },
-					{ "data": "strEmail" },
-					{ "data": "admin"},
-					{ "data": "user"},
-					{ "data": "delete"}
-				]
-			});
 		}
 		
 	} );

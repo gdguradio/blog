@@ -14,6 +14,7 @@ class Post extends BaseController
         $this->db = \Config\Database::connect();
         $this->request = \Config\Services::request();
         $this->session = \Config\Services::session();
+
     }
 
 
@@ -22,6 +23,13 @@ class Post extends BaseController
     public function postlist()
 	{
         $this->session = \Config\Services::session();
+        $pager = \Config\Services::pager();
+		$postModel = new \App\Models\PostModel();
+
+        $data = [
+            'post' => $postModel->paginate(10),
+            'pager' => $postModel->pager
+        ];
         if(!($this->session->has('userID'))){
             return redirect()->route('/');
         }
@@ -32,8 +40,10 @@ class Post extends BaseController
         $this->viewRender('postlist',$data);
 
     }
-    public function updatepost($id){
-        if(!($this->session->has('userID'))){
+
+    public function updatepost($id = null) 
+    {
+        if (!($this->session->has('userID'))) {
             return redirect()->route('/');
         }
         $builder = $this->db->table('post_details A');
@@ -41,8 +51,7 @@ class Post extends BaseController
         $builder->select('A.*');
         $result = $builder->get();
         // print_r(count($result->getResult()));die();
-        if (count($result->getResult()) === 1)
-        {   
+        if (count($result->getResult()) === 1) {   
             $data = [
                     'bannerHeader' => $result->getResult()[0]->bannerHeader,
                     'bannerSubHeader'  => $result->getResult()[0]->bannerSubHeader,
@@ -70,6 +79,8 @@ class Post extends BaseController
 
 
     }
+
+    
 
     public function index()
 	{

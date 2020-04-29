@@ -22,49 +22,49 @@
     $("form").submit(function () {
         switch(this.id) {
             case "login-form":
-                var $lg_username=$('#login_username').val();
-                var $lg_password=$('#login_password').val();
-                var formData = new FormData();
+                // var $lg_username=$('#login_username').val();
+                // var $lg_password=$('#login_password').val();
+                // var formData = new FormData();
         
         
-                formData.append('strUserName',$lg_username);
-                formData.append('strPassWord',$lg_password);
-                $.ajax({
-                    type:'POST',
-                    url: $siteurl + '/Register/retrieve' ,
-                    dataType:"json",
-                    data:formData,
-                    async: true,
-                    cache: false,
-                    contentType: false,
-                    enctype: 'multipart/form-data',
-                    processData: false,
-                    success:function(data)
-                    {
-                        if(data.errstatus == 'true'){
-                            msgChange($('#div-login-msg'), $('#icon-login-msg'), $('#text-login-msg'), "error", "glyphicon-remove", data.msg);
-                        }else{
-                            msgChange($('#div-login-msg'), $('#icon-login-msg'), $('#text-login-msg'), "success", "glyphicon-ok", data.msg);
-                            setTimeout(function() {
-                                $(".infoemail").text("Email : " +data.email)
-                                $(".inforole").text("Role : " +data.role)
-                                $('#login-modal').modal('toggle');
-                                $(".alogin").remove()
-                                console.log(data.role)
-                                if(data.role == 'Admin'){
-                                    // $("header nav").prepend('<a href="'+$siteurl+'/Register/logout" class="alogout">Logout</a>')
-                                    $("#navbarResponsive").append('<ul class="navbar-nav ml-auto"><li class="nav-item"><li class="nav-item"><a class="nav-link" href="'+$siteurl+'/">Home</a></li><li class="nav-item"><a class="nav-link" href="'+$siteurl+'/postlist">Post List</a></li><li class="nav-item"><a class="nav-link" href="'+$siteurl+'/newpost">Create Post</a></li><li class="nav-item"><a href="#" id="change_btn" >Change Password</a></li><li class="nav-item"><a href="'+$siteurl+'/Register" class="nav-link acreg" >Check Register</a></li><li class="nav-item"><a href="'+$siteurl+'/Register/logout" class="nav-link alogout">Logout</a></li></ul>')
+                // formData.append('strUserName',$lg_username);
+                // formData.append('strPassWord',$lg_password);
+                // $.ajax({
+                //     type:'POST',
+                //     url: $siteurl + '/Register/retrieve' ,
+                //     dataType:"json",
+                //     data:formData,
+                //     async: true,
+                //     cache: false,
+                //     contentType: false,
+                //     enctype: 'multipart/form-data',
+                //     processData: false,
+                //     success:function(data)
+                //     {
+                //         if(data.errstatus == 'true'){
+                //             msgChange($('#div-login-msg'), $('#icon-login-msg'), $('#text-login-msg'), "error", "glyphicon-remove", data.msg);
+                //         }else{
+                //             msgChange($('#div-login-msg'), $('#icon-login-msg'), $('#text-login-msg'), "success", "glyphicon-ok", data.msg);
+                //             setTimeout(function() {
+                //                 $(".infoemail").text("Email : " +data.email)
+                //                 $(".inforole").text("Role : " +data.role)
+                //                 $('#login-modal').modal('toggle');
+                //                 $(".alogin").remove()
+                //                 console.log(data.role)
+                //                 if(data.role == 'Admin'){
+                //                     // $("header nav").prepend('<a href="'+$siteurl+'/Register/logout" class="alogout">Logout</a>')
+                //                     $("#navbarResponsive").html('<ul class="navbar-nav ml-auto"><li class="nav-item"><li class="nav-item"><a class="nav-link" href="'+$siteurl+'/">Home</a></li><li class="nav-item"><a class="nav-link" href="'+$siteurl+'/postlist">Post List</a></li><li class="nav-item"><a class="nav-link" href="'+$siteurl+'/newpost">Create Post</a></li><li class="nav-item"><a href="#" id="change_btn" >Change Password</a></li><li class="nav-item"><a href="'+$siteurl+'/Register" class="nav-link acreg" >Check Register</a></li><li class="nav-item"><a href="'+$siteurl+'/Register/logout" class="nav-link alogout">Logout</a></li></ul>')
                                     
 
-                                }else{
-                                    $("#navbarResponsive").append('<ul class="navbar-nav ml-auto"><li class="nav-item"><li class="nav-item"><a class="nav-link" href="'+$siteurl+'/">Home</a></li><li class="nav-item"><a class="nav-link" href="'+$siteurl+'/postlist">Post List</a></li><li class="nav-item"><a class="nav-link" href="'+$siteurl+'/newpost">Create Post</a></li><li class="nav-item"><a href="#" id="change_btn" >Change Password</a></li><li class="nav-item"><a href="'+$siteurl+'/Register/logout" class="nav-link alogout">Logout</a></li></ul>')
-                                }
-                                $("header nav a[href='#menu']").text(data.name)
-                              }, $msgShowTime);
+                //                 }else{
+                //                     $("#navbarResponsive").html('<ul class="navbar-nav ml-auto"><li class="nav-item"><li class="nav-item"><a class="nav-link" href="'+$siteurl+'/">Home</a></li><li class="nav-item"><a class="nav-link" href="'+$siteurl+'/postlist">Post List</a></li><li class="nav-item"><a class="nav-link" href="'+$siteurl+'/newpost">Create Post</a></li><li class="nav-item"><a href="#" id="change_btn" >Change Password</a></li><li class="nav-item"><a href="'+$siteurl+'/Register/logout" class="nav-link alogout">Logout</a></li></ul>')
+                //                 }
+                //                 $("header nav a[href='#menu']").text(data.name)
+                //               }, $msgShowTime);
                             
-                        }   
-                    }
-                });
+                //         }   
+                //     }
+                // });
                 // if ($lg_username == "ERROR") {
                 //     msgChange($('#div-login-msg'), $('#icon-login-msg'), $('#text-login-msg'), "error", "glyphicon-remove", "Login error");
                 // } else {

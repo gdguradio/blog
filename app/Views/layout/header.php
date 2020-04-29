@@ -58,19 +58,19 @@
               <a class="nav-link" href="<?=site_url('/')?>">Home</a>
             </li>
             <li class="nav-item">
-              <a class="nav-link" href="<?=site_url('/postlist')?>">Post List</a>
+              <a class="nav-link" href="<?= route_to('postList') ?>">Post List</a>
             </li>
             <li class="nav-item">
-              <a class="nav-link" href="<?=site_url('/newpost')?>">Create Post</a>
+              <a class="nav-link" href="<?= route_to('postnew')?>">Create Post</a>
             </li>
             <li class="nav-item">
             <!-- <a class="nav-link" id="change_btn" href="#">Change Password</a> -->
 
-              <a href="#" id="change_btn" class="alogin" role="button" data-toggle="modal" data-form="change" data-target="#login-modal">Change Password</a>
+              <a href="#" id="change_btn" class="alogin nav-link" role="button" data-toggle="modal" data-form="change" data-target="#login-modal">Change Password</a>
             </li>
             <?php if (isset($role) && $role === 'Admin') {?>
               <li class="nav-item">
-              <a href="<?=site_url('Register')?>" class="nav-link acreg" >Check Register</a>
+              <a href="<?= route_to('users') ?>" class="nav-link acreg" >Check Register</a>
               </li>
             <?php } ?>
             <li class="nav-item">
@@ -96,7 +96,7 @@
             <div id="div-forms">
             
                 <!-- Begin # Login Form -->
-                <form id="login-form" >
+                <form id="login-form" action="<?=route_to('user') ?>">
                     <div class="modal-body">
                         <div id="div-login-msg">
                             <div id="icon-login-msg" class="glyphicon glyphicon-chevron-right"></div>
