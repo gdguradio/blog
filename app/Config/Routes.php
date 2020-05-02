@@ -30,17 +30,29 @@ $routes->setAutoRoute(true);
 
 // We get a performance increase by specifying the default
 // route since we don't have to scan directories.
-$routes->get('/', 'Home::index');
+$routes->get('/', 'Home::index', ['as' => 'home']);
 
 
 $routes->add('users', 'Register::index', ['as' => 'users']);
-$routes->post('user', 'Register::show', ['as' => 'user']);
+$routes->add('usersnew', 'Register::store', ['as' => 'usersnew']);
+$routes->add('userlost', 'Register::lostPassword', ['as' => 'userlost']);
+$routes->add('userpass', 'Register::changePassword', ['as' => 'changepass']);
 
+$routes->add('users/(:num)/(:num)', 'Register::updaterole/$1/$2', ['as' => 'usersUpdate']);
+$routes->add('users/(:num)', 'Register::deleteuser/$1', ['as' => 'usersdelete']);
+
+// $routes->post('user', 'Register::show', ['as' => 'user']);
+$routes->add('user', 'Register::show', ['as' => 'User']);
+// Redirect to a named route
+$routes->addRedirect('User', 'home');
 
 
 $routes->add('post/(:num)', 'Post::updatepost/$1', ['as' => 'updatePost']);
+$routes->add('postedit/(:num)', 'Post::edit/$1', ['as' => 'updateEdit']);
 $routes->add('postlist', 'Post::postlist', ['as' => 'postList']);
-$routes->add('postnew', 'Post::index');
+$routes->add('post', 'Post::index', ['as' => 'postNew']);
+$routes->add('poststore', 'Post::store', ['as' => 'postStore']);
+$routes->add('postview/(:num)', 'Post::viewpost/$1', ['as' => 'postView']);
 
 // $routes->get('post/(:segment)',      'Post::updatepost/$1', ['as' => 'updatePost']);
 

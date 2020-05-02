@@ -31,7 +31,7 @@ class Post extends BaseController
             'pager' => $postModel->pager
         ];
         if(!($this->session->has('userID'))){
-            return redirect()->route('/');
+            return redirect()->to('/');
         }
 		$data['name'] = $this->session->get('name');
 		$data['email'] = $this->session->get('email');
@@ -44,7 +44,7 @@ class Post extends BaseController
     public function updatepost($id = null) 
     {
         if (!($this->session->has('userID'))) {
-            return redirect()->route('/');
+            return redirect()->to('/');
         }
         $builder = $this->db->table('post_details A');
         $builder->where('A.id', $id);
@@ -70,7 +70,6 @@ class Post extends BaseController
             $data['email'] = $this->session->get('email');
             $data['role'] = $this->session->get('role');
             $data['userID'] = $this->session->get('userID');
-
             // $data['postid'] = $this->session->get('id');
             return $this->viewRender('post',$data);
 
@@ -86,7 +85,7 @@ class Post extends BaseController
 	{
         $this->session = \Config\Services::session();
         if(!($this->session->has('userID'))){
-            return redirect()->route('/');
+            return redirect()->to('/');
         }
 		$data['name'] = $this->session->get('name');
 		$data['email'] = $this->session->get('email');
@@ -95,23 +94,45 @@ class Post extends BaseController
         $this->viewRender('post',$data);
 
     }
-    public function editpost(){
+    public function edit($id = null){
         $this->session = \Config\Services::session();
-        // print_r($this->request->getPost());die();
-
-        // print_r($this->request->getFiles()['bannerimage']);
         // A few settings
-        if(isset($this->request->getFiles()['bannerimage'])){
-            $banner = $this->request->getFiles()['bannerimage'];
+        $bannerimage = null;
+        $bodyimage   = null;
+        // Grab the file by name given in HTML form
+        if ( isset($files['bannerimage']) )
+        {
+            if ( !$files['bannerimage']->isValid() )
+            {
+                $this->session->setFlashdata('showError', 'true');
+                $this->session->setFlashdata('error', 'false');
+                $this->session->setFlashdata('signedIn', NULL);
+                $this->session->setFlashdata('Errormsg', $files['bannerimage']->getErrorString().'('.$files['bannerimage']->getError().')');
+                // return redirect()->route('updatePost/ '.$id.' ');
+                return redirect()->back()->withInput();
+
+            }
+            // A few settings
+            $banner = $files['bannerimage'];
             $tempbanner = $banner->getTempName();
             $typebanner = $banner->getExtension();
             //   // Convert to base64 
             $tempbannerbase64 = base64_encode(file_get_contents($tempbanner) );
             $bannerimage = 'data:image/'.$typebanner.';base64,'.$tempbannerbase64;
         }
-        if(isset($this->request->getFiles()['bodyimage'])){
+        if ( isset($files['bodyimage']) )
+        {
+            if ( !$files['bodyimage']->isValid())
+            {
+                $this->session->setFlashdata('showError', 'true');
+                $this->session->setFlashdata('error', 'false');
+                $this->session->setFlashdata('signedIn', NULL);
+                $this->session->setFlashdata('Errormsg', $files['bodyimage']->getErrorString().'('.$files['bodyimage']->getError().')');
+                // return redirect()->route('updatePost/ '.$id.' ');
+                return redirect()->back()->withInput();
+            } 
             // A few settings
-            $body = $this->request->getFiles()['bodyimage'];
+            $body = $files['bodyimage'];
             $tempbody = $body->getTempName();
             $typebody = $body->getExtension();
             //   // Convert to base64 
@@ -133,98 +154,140 @@ class Post extends BaseController
             'bodyScndHeading'  => $this->request->getPost()['bodyScndHeading'],
             'bodyImgCaption'  => $this->request->getPost()['bodyImgCaption'],
             'bodyFrstPara'  => $this->request->getPost()['bodyFrstPara'],
-            'bodyScndPara'  => $this->request->getPost()['bodyScndPara'],
-            'bannerimage'  => $bannerimage,
-            'bodyimage'  => $bodyimage
+            'bodyScndPara'  => $this->request->getPost()['bodyScndPara']
         ];
-        // $this->validation->run($data, 'signup');
-        // $errors = $this->validation->getErrors();
-        // if(count($errors) > 0){
-        //     foreach($errors AS $key => $value){
-        //         return json_encode(array('errstatus' => 'true' , 'msg' => $value));
-        //     }
-        //     return json_encode(array('errstatus' => 'true' , 'msg' => $errors[0]));
-        // }
-        $result = $builder->update($data,['WHERE id = ' . $this->request->getPost()['id']]);
+        if($bannerimage != null){
+            $data['bannerimage'] = $bannerimage;
+        }
+        if($bodyimage != null){
+            $data['bodyimage'] = $bodyimage;
+        }
+        $this->validation->run($data, 'editpost');
+        $errors = $this->validation->getErrors();
+        if(count($errors) > 0){
+            $value = empty($errors) ? 'No Error' : reset($errors);
+            $this->session->setFlashdata('showError', 'true');
+            $this->session->setFlashdata('error', 'false');
+            $this->session->setFlashdata('signedIn', NULL);
+            $this->session->setFlashdata('Errormsg', $value);
+            // return redirect()->route('updatePost/ '.$id.' ');
+            return redirect()->back()->withInput();
+        }
+        $result = $builder->update($data,['WHERE id = ' . $id]);//$this->request->getPost()['id']
         if ($result === false)
         {   
-            
-            return json_encode(array('errstatus' => 'true' , 'msg' => 'Update Failed!'));
-        }else
+            $this->session->setFlashdata('showError', 'true');
+            $this->session->setFlashdata('error', 'true');
+            $this->session->setFlashdata('signedIn', NULL);
+            $this->session->setFlashdata('Errormsg', 'Update Failed!');
+            // return redirect()->route('updatePost/ '.$id.' ');
+            return redirect()->back()->withInput();
+        }
+        else
         {
+            $this->session->setFlashdata('showError', 'true');
+            $this->session->setFlashdata('error', 'false');
+            $this->session->setFlashdata('signedIn', NULL);
+            $this->session->setFlashdata('Errormsg', 'Update Successful!');
+            // return redirect()->route('updatePost/ '.$id.' ');
+            // return redirect()->back()->withInput();
+            return redirect()->route('postList');
+
             
-            return json_encode(array('errstatus' => 'false' , 'msg' => 'Update Successful!'));
         }
 
     }
-    public function newpost(){
+    public function store(){
         $this->session = \Config\Services::session();
+        $files = $this->request->getFiles();
         
-        // print_r($this->request->getFiles()['bannerimage']);
-        if (! $this->request->getFiles()['bannerimage']->isValid())
+        $bannerimage = null;
+        $bodyimage   = null;
+        // Grab the file by name given in HTML form
+        if ( isset($files['bannerimage']) )
         {
-            return json_encode(array('errstatus' => 'true' , 'msg' => $this->request->getFiles()['bannerimage']->getErrorString().'('.$this->request->getFiles()['bannerimage']->getError().')'));
+            if ( !$files['bannerimage']->isValid() )
+            {
+                $this->session->setFlashdata('showError', 'true');
+                $this->session->setFlashdata('error', 'false');
+                $this->session->setFlashdata('signedIn', NULL);
+                $this->session->setFlashdata('Errormsg', $files['bannerimage']->getErrorString().'('.$files['bannerimage']->getError().')');
+                return redirect()->route('postNew');
+            }
+            // A few settings
+            $banner = $files['bannerimage'];
+            $tempbanner = $banner->getTempName();
+            $typebanner = $banner->getExtension();
+            //   // Convert to base64 
+            $tempbannerbase64 = base64_encode(file_get_contents($tempbanner) );
+            $bannerimage = 'data:image/'.$typebanner.';base64,'.$tempbannerbase64;
         }
-        if (! $this->request->getFiles()['bodyimage']->isValid())
+        if ( isset($files['bodyimage']) )
         {
-            return json_encode(array('errstatus' => 'true' , 'msg' => $this->request->getFiles()['bodyimage']->getErrorString().'('.$this->request->getFiles()['bodyimage']->getError().')'));
-        }        
-        // A few settings
-        $banner = $this->request->getFiles()['bannerimage'];
-        $tempbanner = $banner->getTempName();
-        $typebanner = $banner->getExtension();
-        //   // Convert to base64 
-        $tempbannerbase64 = base64_encode(file_get_contents($tempbanner) );
-        $bannerimage = 'data:image/'.$typebanner.';base64,'.$tempbannerbase64;
-        // A few settings
-        $body = $this->request->getFiles()['bodyimage'];
-        $tempbody = $body->getTempName();
-        $typebody = $body->getExtension();
-        //   // Convert to base64 
-        $tempbodybase64 = base64_encode(file_get_contents($tempbody) );
-        $bodyimage = 'data:image/'.$typebody.';base64,'.$tempbodybase64;
+            if ( !$files['bodyimage']->isValid())
+            {
+                $this->session->setFlashdata('showError', 'true');
+                $this->session->setFlashdata('error', 'false');
+                $this->session->setFlashdata('signedIn', NULL);
+                $this->session->setFlashdata('Errormsg', $files['bodyimage']->getErrorString().'('.$files['bodyimage']->getError().')');
+                return redirect()->route('postNew');
+            } 
+            // A few settings
+            $body = $files['bodyimage'];
+            $tempbody = $body->getTempName();
+            $typebody = $body->getExtension();
+            //   // Convert to base64 
+            $tempbodybase64 = base64_encode(file_get_contents($tempbody) );
+            $bodyimage = 'data:image/'.$typebody.';base64,'.$tempbodybase64;
+        } 
+            
+            
+        
         
         $builder = $this->db->table('post_details');
         
         $data = [
             'user_id' => $this->session->get('userID'),
-            'bannerHeader' => $this->request->getPost()['bannerHeader'],
-            'bannerSubHeader'  => $this->request->getPost()['bannerSubHeader'],
-            'bodyFrstHeading'  => $this->request->getPost()['bodyFrstHeading'],
-            'bodyFrstBlockQuote'  =>$this->request->getPost()['bodyFrstBlockQuote'],
-            'bodyScndHeading'  => $this->request->getPost()['bodyScndHeading'],
-            'bodyImgCaption'  => $this->request->getPost()['bodyImgCaption'],
-            'bodyFrstPara'  => $this->request->getPost()['bodyFrstPara'],
-            'bodyScndPara'  => $this->request->getPost()['bodyScndPara'],
+            'bannerHeader' => isset($this->request->getPost()['bannerHeader']) ? $this->request->getPost()['bannerHeader'] : NULL,
+            'bannerSubHeader'  => isset($this->request->getPost()['bannerSubHeader']) ? $this->request->getPost()['bannerSubHeader'] : NULL,
+            'bodyFrstHeading'  => isset($this->request->getPost()['bodyFrstHeading']) ? $this->request->getPost()['bodyFrstHeading'] : NULL,
+            'bodyFrstBlockQuote'  => isset($this->request->getPost()['bodyFrstBlockQuote']) ? $this->request->getPost()['bodyFrstBlockQuote'] : NULL,
+            'bodyScndHeading'  => isset($this->request->getPost()['bodyScndHeading']) ? $this->request->getPost()['bodyScndHeading'] : NULL,
+            'bodyImgCaption'  => isset($this->request->getPost()['bodyImgCaption']) ? $this->request->getPost()['bodyImgCaption'] : NULL,
+            'bodyFrstPara'  => isset($this->request->getPost()['bodyFrstPara']) ? $this->request->getPost()['bodyFrstPara'] : NULL,
+            'bodyScndPara'  => isset($this->request->getPost()['bodyScndPara']) ? $this->request->getPost()['bodyScndPara'] : NULL,
             'bannerimage'  => $bannerimage,
             'bodyimage'  => $bodyimage
         ];
 
-        // $this->validation->run($data, 'signup');
-        // $errors = $this->validation->getErrors();
-        // if(count($errors) > 0){
-        //     foreach($errors AS $key => $value){
-        //         return json_encode(array('errstatus' => 'true' , 'msg' => $value));
-        //     }
-        //     return json_encode(array('errstatus' => 'true' , 'msg' => $errors[0]));
-        // }
         $this->validation->run($data, 'newpost');
         $errors = $this->validation->getErrors();
         if(count($errors) > 0){
-            foreach($errors AS $key => $value){
-                return json_encode(array('errstatus' => 'true' , 'msg' => $value));
-            }
-            return json_encode(array('errstatus' => 'true' , 'msg' => $errors[0]));
+            $value = empty($errors) ? 'No Error' : reset($errors);
+            $this->session->setFlashdata('showError', 'true');
+            $this->session->setFlashdata('error', 'false');
+            $this->session->setFlashdata('signedIn', NULL);
+            $this->session->setFlashdata('Errormsg', $value);
+            // return redirect()->route('updatePost/ '.$id.' ');
+            return redirect()->back()->withInput();
         }
         $result = $builder->insert($data);
         if ($result === false)
         {   
-            
-            return json_encode(array('errstatus' => 'true' , 'msg' => 'Insert Failed!'));
-        }else
+            $this->session->setFlashdata('showError', 'true');
+            $this->session->setFlashdata('error', 'true');
+            $this->session->setFlashdata('signedIn', NULL);
+            $this->session->setFlashdata('Errormsg', 'Insert Failed!');
+            return redirect()->route('postNew');
+
+        }
+        else
         {
-            
-            return json_encode(array('errstatus' => 'false' , 'msg' => 'Insert Successful!'));
+            $this->session->setFlashdata('showError', 'true');
+            $this->session->setFlashdata('error', 'false');
+            $this->session->setFlashdata('signedIn', NULL);
+            $this->session->setFlashdata('Errormsg', 'Insert Successful!');
+            return redirect()->route('postNew');
         }
 
     }

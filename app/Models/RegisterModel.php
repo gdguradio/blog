@@ -6,7 +6,10 @@ use \CodeIgniter\Database\ConnectionInterface;
 class RegisterModel extends Model
 {
 
-    protected $table      = 'users';
+    // protected $table      = 'users';
+    protected $table      = 'table_users';
+    protected $db;
+
     protected $primaryKey = 'id';
 
     protected $returnType = 'array';
@@ -24,6 +27,19 @@ class RegisterModel extends Model
     protected $validationMessages = [];
     protected $skipValidation     = false;
     
+    /**
+     * Only need to create the View so the pagination can access it via
+     * $this->table (protected $table = 'table_view')
+     */
+    public function create_view_user() {
+        $this->db = \Config\Database::connect();
+
+        $sql = "CREATE OR REPLACE VIEW table_users AS ";
+        // Whatever your SQL needs to be goes here
+        $sql .= "SELECT * FROM (SELECT * FROM users WHERE bitDeleteFlag = 0 ) AS A WHERE bitActiveFlag = 0";
+        // echo $sql;
+        $query = $this->db->query($sql);
+    }
     public function hashPassword($data)
     {
         $hashed;

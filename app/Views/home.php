@@ -24,14 +24,16 @@
         <?php if (isset($post) && count($post) > 0) { ?>
             <?php foreach($post AS $key => $value){?>
             <div class="post-preview">
-            <a href="<?=site_url('/Post/viewpost/'.$value["id"].'')?>">
+            <!-- <a href="<?=site_url('/Post/viewpost/'.$value["id"].'')?>"> -->
+                <a href="<?= route_to('postView', $value['id']) ?>">
+
                 <h2 class="post-title">
                     <?=$value['bannerHeader']?>
                 </h2>
                 <h3 class="post-subtitle">
                     <?=$value['bannerSubHeader']?>
                 </h3>
-            </a>
+              </a>
             <p class="post-meta">Posted by
               <a href="#"><?=$value['strFullName']?></a>
               on <?=$value['dteCreatedDate']?></p>

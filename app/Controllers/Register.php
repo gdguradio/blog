@@ -22,17 +22,24 @@ class Register extends BaseController
 
 
 
-
+    function removeElementWithValue($array, $key, $value){
+        foreach($array as $subKey => $subArray){
+             if($subArray[$key] == $value){
+                  unset($array[$subKey]);
+             }
+        }
+        return $array;
+   }
     public function index()
 	{
         $this->session = \Config\Services::session();
         if(!($this->session->has('userID'))){
-            return redirect()->route('/');
+            return redirect()->to('/');
         }
 
         $pager = \Config\Services::pager();
-		$registerModel = new \App\Models\RegisterModel();
-
+        $registerModel = new \App\Models\RegisterModel();
+        $registerModel->create_view_user();
         $data = [
             'users' => $registerModel->paginate(10),
             'pager' => $registerModel->pager
@@ -48,58 +55,62 @@ class Register extends BaseController
     public function show(){
         $registerModel = new RegisterModel;
         $builder = $this->db->table('users A');
-        $strUserName  = $_POST['strUserName'];
-        $strPassWord = password_hash(ltrim(rtrim($_POST['strPassWord'])), PASSWORD_DEFAULT);
+        $strUserName  = $this->request->getPost()['strUserName'];
+        $strPassWord = password_hash(ltrim(rtrim($this->request->getPost()['strPassWord'])), PASSWORD_DEFAULT);
         $builder->where('strUserName', $strUserName);
         $builder->where('bitActiveFlag', 1);
         $builder->where('bitDeleteFlag', 0);
-        // $builder->where('strPassWord', $strPassWord);
         $builder->select('A.*,C.strRoleName,C.strRoleAccess');
         $builder->join('user_role B', 'A.id = B.user_id','inner');
         $builder->join('roles C', 'B.role_id = C.id','inner');
 
-        // $builder->join('comments', 'comments.id = blogs.id');
         $result = $builder->get();
-        // print_r($this->db->getLastQuery());die();
-        // $query = $this->db->getLastQuery();
-        // if ($user && password_verify($_POST['strPassWord'], $result->getResult()[0]->strPassWord))
-        // {
-        //     echo "valid!";
-        // } else {
-        //     echo "invalid";
-        // }
+        // print_r($builder->get()->getResult());
         if (count($result->getResult()) === 1)
         {   
-            if(password_verify($_POST['strPassWord'], $result->getResult()[0]->strPassWord))
+            $name  = $result->getResult()[0]->strFullName;
+            $email  = $result->getResult()[0]->strEmail;
+            $role  = $result->getResult()[0]->strRoleName;
+            $access  = $result->getResult()[0]->strRoleAccess;
+            $userID  = $result->getResult()[0]->id;
+            if(password_verify($this->request->getPost()['strPassWord'], $result->getResult()[0]->strPassWord))
             {
-                // return redirect()->to('/home');
-                $this->session = \Config\Services::session();
+                // $this->session = \Config\Services::session();
+                
+
                 $userdata = [
-                        'name'  => $result->getResult()[0]->strFullName,
-                        'email'  => $result->getResult()[0]->strEmail,
-                        'role'  => $result->getResult()[0]->strRoleName,
-                        'access'  => $result->getResult()[0]->strRoleAccess,
-                        'userID'  => $result->getResult()[0]->id,
-                        'signedIn'  => true
+                        'name'  => $name,
+                        'email'  => $email,
+                        'role'  => $role,
+                        'access'  => $access,
+                        'userID'  => $userID,
+                        'showError' => 'false',
+                        'signedIn'  => 'true'
                 ];
                 $this->session->set($userdata);
-                
-                // return json_encode(array('errstatus' => 'false' , 'msg' => 'Logged in Successfully!' , 
-                //                     'name' => $result->getResult()[0]->strFullName, 
-                //                     'email' => $result->getResult()[0]->strEmail, 
-                //                     'role' => $result->getResult()[0]->strRoleName
-                //                 ));
+                $this->session->setFlashdata('showError', 'false');
+                $this->session->setFlashdata('signedIn', 'true');
 
             }else
             {
-                return json_encode(array('errstatus' => 'true' , 'msg' => 'Incorrect Password!'));
+                $this->session->setFlashdata('showError', 'true');
+                $this->session->setFlashdata('signedIn', 'false');
+                $this->session->setFlashdata('usedForm', 'login');
+                $this->session->setFlashdata('Errormsg', 'Incorrect Password!');
+                // return redirect()->route('home');
+
             }
             
         }else
         {
-            return json_encode(array('errstatus' => 'true' , 'msg' => 'Username Does not exists!'));
-        }
+                $this->session->setFlashdata('showError', 'true');
+                $this->session->setFlashdata('signedIn', 'false');
+                $this->session->setFlashdata('usedForm', 'login');
+                $this->session->setFlashdata('Errormsg', 'Username Does not exists!');
+                // return redirect()->route('home');
 
+        }
+        return redirect()->route('home');
     }
     public function store()
     {
@@ -112,62 +123,42 @@ class Register extends BaseController
         
 
         $data = [
-            'strEmail' => $_POST['strEmail'],
-            'strFullName'  => $_POST['strFullName'],
-            'strUserName'  => $_POST['strUserName'],
-            'intAge'  => $_POST['intAge'],
-            'strPassWord'  => $_POST['strPassWord'],
+            'strEmail' => $this->request->getPost()['strEmail'],
+            'strFullName'  => $this->request->getPost()['strFullName'],
+            'strUserName'  => $this->request->getPost()['strUserName'],
+            'intAge'  => $this->request->getPost()['intAge'],
+            'strPassWord'  => $this->request->getPost()['strPassWord'],
         ];
         $this->validation->run($data, 'signup');
         $errors = $this->validation->getErrors();
         if(count($errors) > 0){
-            // $errorstring = '<ol>';
-            foreach($errors AS $key => $value){
-                return json_encode(array('errstatus' => 'true' , 'msg' => $value));
-                // $errorstring .= "<li>". $value . "</li>";
-            }
-            // $errorstring .= '</ol>';
-            // // We pass (only) session data to the View
-            // $this->session->setFlashdata('errmsg', json_encode(array('errstatus' => 'true' , 'msg' => $errorstring)));
-            // $page['errmsg'] = $this->session->getFlashdata('errmsg');
-            // return view('pages/register',$page);
-            // return redirect()->to('/register');
-            return json_encode(array('errstatus' => 'true' , 'msg' => $errors[0]));
+            $value = empty($errors) ? 'No Error' : reset($errors);
+            $this->session->setFlashdata('showError', 'true');
+            $this->session->setFlashdata('signedIn', 'false');
+            $this->session->setFlashdata('usedForm', 'register');
+            $this->session->setFlashdata('Errormsg', $value);
+            // return redirect()->route('updatePost/ '.$id.' ');
+            return redirect()->back()->withInput();
         }
-        $data['strPassWord'] = password_hash(ltrim(rtrim($_POST['strPassWord'])), PASSWORD_DEFAULT);//$registerModel->hashPassword(ltrim(rtrim($_POST['strPassWord'])));
+        $data['strPassWord'] = password_hash(ltrim(rtrim($this->request->getPost()['strPassWord'])), PASSWORD_DEFAULT);
         $result = $builder->insert($data);
         if ($result === false)
         {   
-            // We set some data
-            // $this->session->setFlashdata('errmsg', json_encode(array('errstatus' => 'true' , 'msg' => 'Insert Failed!')));
-            // $this->session->errmsg = json_encode(array('errstatus' => 'true' , 'msg' => 'Insert Failed!'));
-
-            // // We pass (only) session data to the View
-            // // return view('pages/register', $this->session->get());
-            // $page['errmsg'] = $this->session->getFlashdata('errmsg');
-            // return view('pages/register',$page);
-            return json_encode(array('errstatus' => 'true' , 'msg' => 'Insert Failed!'));
+            $this->session->setFlashdata('showError', 'true');
+            $this->session->setFlashdata('signedIn', 'false');
+            $this->session->setFlashdata('usedForm', 'register');
+            $this->session->setFlashdata('Errormsg', 'Insert Failed!');
+            // return json_encode(array('errstatus' => 'true' , 'msg' => 'Insert Failed!'));
         }else
         {
-            // We set some data
-            // $this->session->errmsg = json_encode(array('errstatus' => 'false' , 'msg' => 'Insert Successful!'));
-            // $this->session->setFlashdata('errmsg', json_encode(array('errstatus' => 'false' , 'msg' => 'Insert Successful!')));
-            // // We pass (only) session data to the View
-            // // return view('pages/register', $this->session->get());
-            // $page['errmsg'] = $this->session->getFlashdata('errmsg');
-            // return view('pages/register',$page);
-            // return redirect()->to('/login');
-            return json_encode(array('errstatus' => 'false' , 'msg' => 'Insert Successful!'));
+            $this->session->setFlashdata('showError', 'true');
+            $this->session->setFlashdata('signedIn', 'false');
+            $this->session->setFlashdata('usedForm', 'register');
+            $this->session->setFlashdata('Errormsg', 'Insert Failed!');
+            // return json_encode(array('errstatus' => 'false' , 'msg' => 'Insert Successful!'));
         }
-        // $request->validate([
-        //     'name' => 'required|max:255',
-        // ]);
+        return redirect()->route('home');
 
-        // $player = Player::create($request->all());
-
-        // return (new PlayerResource($player))
-        //         ->response()
-        //         ->setStatusCode(201);
     }
 
 
@@ -181,9 +172,8 @@ class Register extends BaseController
         return redirect()->to('/');
     }
 	
-    public function deleteuser(){
+    public function deleteuser($user_id){
 
-        $user_id = $_POST['user_id'];
         $updaterole = "update users set bitDeleteFlag = 1 where id = :user_id:";
         $resultupdaterole = $this->db->query($updaterole, [
                 'user_id'     => $user_id
@@ -192,20 +182,24 @@ class Register extends BaseController
         // print_r($this->db->error());die();
         if($this->db->error()['code'] == '0')
         {
-            return json_encode(array('errstatus' => 'false' , 'msg' => 'Successfully Deleted!','id' => $user_id)); 
-
-        }else
-        {
-            return json_encode(array('errstatus' => 'true' , 'msg' => 'Something went wrong!','id' => $user_id)); 
-
+            $this->db->transRollback();
+            $this->session->setFlashdata('showError', 'true');
+            $this->session->setFlashdata('error', 'false');
+            $this->session->setFlashdata('signedIn', NULL);
+            $this->session->setFlashdata('Errormsg', 'Successfully Deleted!');
         }
-
+        else
+        {
+            $this->db->transCommit();
+            $this->session->setFlashdata('showError', 'true');
+            $this->session->setFlashdata('error', 'true');
+            $this->session->setFlashdata('signedIn', NULL);
+            $this->session->setFlashdata('Errormsg', 'Something went wrong!');
+        }
+        return redirect()->route('users');
 
     }
-    public function updaterole(){
-
-        $user_id = $_POST['user_id'];
-        $role_id = $_POST['role_id'];
+    public function updaterole($role_id,$user_id){
 
 
         $this->db->transBegin();
@@ -223,15 +217,22 @@ class Register extends BaseController
         if ($this->db->transStatus() === FALSE)
         {
                 $this->db->transRollback();
-                return json_encode(array('errstatus' => 'true' , 'msg' => 'Something went wrong!','id' => $user_id)); 
+                $this->session->setFlashdata('showError', 'true');
+                $this->session->setFlashdata('error', 'true');
+                $this->session->setFlashdata('signedIn', NULL);
+                $this->session->setFlashdata('Errormsg', 'Something went wrong!');
         }
         else
         {
                 $this->db->transCommit();
-                return json_encode(array('errstatus' => 'false' , 'msg' => 'Successfully Confirmed account!','id' => $user_id)); 
+                $this->session->setFlashdata('showError', 'true');
+                $this->session->setFlashdata('error', 'false');
+                $this->session->setFlashdata('signedIn', NULL);
+                $this->session->setFlashdata('Errormsg', 'Successfully Confirmed account!');
 
         }
-        
+        return redirect()->route('users');
+
     }
     public function getAllRequest(){
         $registerModel = new RegisterModel;
@@ -259,17 +260,20 @@ class Register extends BaseController
 
 
         $data = [
-            'npassword' => $_POST['npassword'],
-            'cpassword'  => $_POST['cpassword'],
+            'npassword' => $this->request->getPost()['npassword'],
+            'cpassword'  => $this->request->getPost()['cpassword'],
             
         ];
         $this->validation->run($data, 'changepassword');
         $errors = $this->validation->getErrors();
         if(count($errors) > 0){
-            foreach($errors AS $key => $value){
-                return json_encode(array('errstatus' => 'true' , 'msg' => $value));
-            }
-            return json_encode(array('errstatus' => 'true' , 'msg' => $errors[0]));
+            $value = empty($errors) ? 'No Error' : reset($errors);
+            $this->session->setFlashdata('showError', 'true');
+            $this->session->setFlashdata('signedIn', 'true');
+            $this->session->setFlashdata('usedForm', 'change');
+            $this->session->setFlashdata('Errormsg', $value);
+            // return redirect()->route('updatePost/ '.$id.' ');
+            return redirect()->back()->withInput();
         }
         $hashpassword = password_hash(ltrim(rtrim($cpassword)), PASSWORD_DEFAULT);
         $updatedata = ['strPassWord' => $hashpassword];
@@ -277,21 +281,37 @@ class Register extends BaseController
         $result = $builder->update($updatedata,['WHERE id = ' . $id]);
         if ($result === false)
         {   
-            return json_encode(array('errstatus' => 'true' , 'msg' => 'Change Password Failed!'));
+            $this->session->setFlashdata('showError', 'true');
+            $this->session->setFlashdata('signedIn', 'true');
+            $this->session->setFlashdata('usedForm', 'change');
+            $this->session->setFlashdata('Errormsg', 'Change Password Failed!');
         }else
         {
-            return json_encode(array('errstatus' => 'false' , 'msg' => 'Change Password Successful!'));
+            $this->session->setFlashdata('showError', 'true');
+            $this->session->setFlashdata('signedIn', 'true');
+            $this->session->setFlashdata('usedForm', 'change');
+            $this->session->setFlashdata('Errormsg', 'Change Password Successful!');
         }
     }
     public function lostPassword(){
 
         $Email = new Email;
         $registerModel = new RegisterModel;
-        $request = \Config\Services::request();
-        $strEmail = $request->getPost()['strEmail'];
+        // $request = \Config\Services::request();
+        $strEmail = $this->request->getPost()['strEmail'];
 
-
-        
+        $data = ['strEmail' => $strEmail];
+        $this->validation->run($data, 'email');
+        $errors = $this->validation->getErrors();
+        if(count($errors) > 0){
+            $value = empty($errors) ? 'No Error' : reset($errors);
+            $this->session->setFlashdata('showError', 'true');
+            $this->session->setFlashdata('signedIn', 'false');
+            $this->session->setFlashdata('usedForm', 'lost');
+            $this->session->setFlashdata('Errormsg', $value);
+            // return redirect()->route('updatePost/ '.$id.' ');
+            return redirect()->back()->withInput();
+        }
         $builder = $this->db->table('users A');
 
         $builder->where('strEmail', $strEmail);
@@ -323,18 +343,39 @@ class Register extends BaseController
             
             if ($this->db->transStatus() === FALSE) {
                 $this->db->transRollback();
-                return json_encode(array('errstatus' => 'true' , 'msg' => 'Something went wrong!'));
+                $this->session->setFlashdata('showError', 'true');
+                $this->session->setFlashdata('error', 'true');
+                $this->session->setFlashdata('signedIn', 'false');
+                $this->session->setFlashdata('usedForm', 'lost');
+                $this->session->setFlashdata('Errormsg', 'Something went wrong!');
             } else {
                 $resultemail = $Email->htmlmail($user,$name,$strEmail,$role,$newpassword,'Password Reset');
                 if ($resultemail['errstatus'] == 'false') {
                     $this->db->transCommit();
-                    return json_encode(array('errstatus' => 'false' , 'msg' => 'Successfully reset password. New password sent to email')); 
+                    $this->session->setFlashdata('showError', 'true');
+                    $this->session->setFlashdata('error', 'false');
+                    $this->session->setFlashdata('signedIn', 'false');
+                    $this->session->setFlashdata('usedForm', 'lost');
+                    $this->session->setFlashdata('Errormsg', 'Successfully reset password. New password sent to email');
                 } else {
                     $this->db->transRollback();
-                    return json_encode(array('errstatus' => 'true' , 'msg' => 'Email Sending Failed!')); 
+                    $this->session->setFlashdata('showError', 'true');
+                    $this->session->setFlashdata('error', 'true');
+                    $this->session->setFlashdata('signedIn', 'false');
+                    $this->session->setFlashdata('usedForm', 'lost');
+                    $this->session->setFlashdata('Errormsg', 'Email Sending Failed!');
                 }   
             }
-        }
+            
+        }else {
+            $this->db->transRollback();
+            $this->session->setFlashdata('showError', 'true');
+            $this->session->setFlashdata('error', 'true');
+            $this->session->setFlashdata('signedIn', 'false');
+            $this->session->setFlashdata('usedForm', 'lost');
+            $this->session->setFlashdata('Errormsg', 'Email not registered!');
+        }   
+        return redirect()->back()->withInput();
     }
     
 

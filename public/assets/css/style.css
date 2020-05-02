@@ -26,8 +26,10 @@
 #div-lost-msg,
 #div-register-msg {
     border: 1px solid #dadfe1;
-    height: 30px;
+    min-height: 30px;
     line-height: 28px;
+    /* line-height: min(10vh, 28px);
+    line-height: max(10vh, 56px); */
     transition: all ease-in-out 500ms;
 }
 

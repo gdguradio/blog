@@ -7,7 +7,6 @@
           <div class="post-heading">
             <h1><?=$bannerHeader?></h1>
             <h2 class="subheading"><?=$bannerSubHeader?></h2>
-            <!-- <span class="meta"><?=$bannermeta?></span> -->
             <span class="meta">Posted by
               <a href="#"><?=$strFullName?></a>
               on <?=$dteCreatedDate?></span>
@@ -45,5 +44,4 @@
   </article>
 
   <hr>
-  <script src="<?php echo base_url('assets/jquery/jquery.min.js'); ?>"></script>
-  <script src="<?php echo base_url('assets/bootstrap/js/bootstrap.bundle.min.js'); ?>"></script>
+

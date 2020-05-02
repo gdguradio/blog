@@ -33,7 +33,16 @@ class Validation
 	//--------------------------------------------------------------------
 	// Rules
 	//--------------------------------------------------------------------
-
+	public $email = [
+		'strEmail'        =>  ['label' => 'Email Address', 'rules' => 'required|valid_email|is_unique[users.strEmail]']
+        
+	];
+	public $email_errors = [
+        'strEmail'    => [
+			'required'    => 'Email cannot be empty.',
+            'valid_email' => 'Please check the Email field. It does not appear to be valid.'
+        ]
+	];
 	public $signup = [
 		'strFullName'     => ['label' => 'Full Name', 'rules' => 'required|alpha_space'],
 		'intAge'     =>  ['label' => 'Age', 'rules' => 'required|is_natural_no_zero'],
@@ -54,6 +63,7 @@ class Validation
             'required'    => 'Username cannot be empty.',
 		],
         'strEmail'    => [
+			'required'    => 'Email cannot be empty.',
             'valid_email' => 'Please check the Email field. It does not appear to be valid.'
         ],
 		'strPassWord' => [
@@ -106,7 +116,44 @@ class Validation
             'required'    => 'Post Body Image cannot be empty.',
         ]
 	];
-
+	public $editpost = [
+		'bannerHeader'     => ['label' => 'Post Title', 'rules' => 'required|max_length[255]'],
+		'bannerSubHeader'     =>  ['label' => 'Post Sub Title', 'rules' => 'required|max_length[255]'],
+		'bodyFrstHeading'     =>  ['label' => 'Post First Header', 'rules' => 'required|max_length[255]'],
+		'bodyFrstBlockQuote'  =>  ['label' => 'Post Quote', 'rules' => 'required|max_length[255]'],
+		'bodyScndHeading'     =>  ['label' => 'Post Second Header', 'rules' => 'required|max_length[255]'],
+		'bodyImgCaption'     =>  ['label' => 'Post Body Image Caption', 'rules' => 'required|max_length[255]'],
+		'bodyFrstPara'     =>  ['label' => 'Post First Paragraph', 'rules' => 'required'],
+		'bodyScndPara'     =>  ['label' => 'Post Second Paragraph', 'rules' => 'required'],
+		
+        
+    ];
+	public $editpost_errors = [
+        'bannerHeader' => [
+            'required'    => 'Post Title cannot be empty.',
+		],
+		'bannerSubHeader' => [
+            'required'    => 'Post Sub Title cannot be empty.',
+		],
+		'bodyFrstHeading' => [
+            'required'    => 'Post First Header cannot be empty.',
+		],
+        'bodyFrstBlockQuote'    => [
+            'required'    => 'Post Quote cannot be empty.',
+        ],
+		'bodyScndHeading' => [
+            'required'    => 'Post Second Header cannot be empty.',
+        ],
+		'bodyImgCaption' => [
+            'required'    => 'Post Body Image Caption cannot be empty.',
+        ],
+		'bodyFrstPara' => [
+            'required'    => 'Post First Paragraph cannot be empty.',
+        ],
+		'bodyScndPara' => [
+            'required'    => 'Post Second Paragraph cannot be empty.',
+        ]
+	];
 	public $changepassword = [
 		'npassword'     =>  ['label' => 'New Password', 'rules' => 'required|alpha_numeric|min_length[6]'],
         'cpassword' => ['label' => 'Confirm Password','rules' =>'required|matches[npassword]'],

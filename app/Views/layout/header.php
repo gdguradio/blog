@@ -1,3 +1,5 @@
+<?php $session = \Config\Services::session();?>
+
 <!DOCTYPE html>
 <html lang="en">
 
@@ -61,7 +63,7 @@
               <a class="nav-link" href="<?= route_to('postList') ?>">Post List</a>
             </li>
             <li class="nav-item">
-              <a class="nav-link" href="<?= route_to('postnew')?>">Create Post</a>
+              <a class="nav-link" href="<?= route_to('postNew')?>">Create Post</a>
             </li>
             <li class="nav-item">
             <!-- <a class="nav-link" id="change_btn" href="#">Change Password</a> -->
@@ -82,28 +84,61 @@
     </div>
   </nav>
 <!-- BEGIN # MODAL LOGIN -->
-<div class="modal fade" id="login-modal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true" style="display: none;">
+<div class="modal fade" id="login-modal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true" style="display: <?php if( $session->getFlashdata('signedIn') != NULL && $session->getFlashdata('showError') != NULL && $session->getFlashdata('showError') == 'true' ){echo 'block !important;';}else{echo 'none !important;';} echo 'opacity:1 !important;';  ?>">
     <div class="modal-dialog">
         <div class="modal-content">
             <div class="modal-header" align="center">
                 <center><img class="img-circle" id="img_logo" src="<?php echo base_url('assets/img/logo.jpg'); ?>"></center>
                 <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                    <span class="glyphicon glyphicon-remove" aria-hidden="true"></span>
+                    <span class="glyphicon glyphicon-remove" aria-hidden="true"></span> X
                 </button>
             </div>
             
             <!-- Begin # DIV Form -->
             <div id="div-forms">
-            
+                <!-- error message start -->
+                <?php if( $session->getFlashdata('signedIn') != NULL && $session->getFlashdata('showError') == 'false' ): ?>
+                    <div id="div-login-msg" class="success">
+                        <div id="icon-login-msg" class="glyphicon glyphicon-chevron-ok"></div>
+                        <span id="text-login-msg" >
+                            <?=$session->getFlashdata('Errormsg');?>
+                        </span>
+                    </div>
+                    <?php elseif( $session->getFlashdata('signedIn') != NULL  && $session->getFlashdata('showError') == 'true' ): ?>
+                    <div id="div-login-msg" class="error">
+                        <div id="icon-login-msg" class="glyphicon glyphicon-chevron-remove"></div>
+                        <span id="text-login-msg" >
+                            <?=$session->getFlashdata('Errormsg');?>
+                        </span>
+                    </div>
+                <?php else :?>
+                    <!-- <div id="div-login-msg ">
+                        <div id="icon-login-msg" class="glyphicon glyphicon-chevron-right"></div>
+                        <span id="text-login-msg">
+                            Type your username and password.
+                        </span>
+                    </div> -->
+                <?php endif ?>
+            <!-- error message end -->
                 <!-- Begin # Login Form -->
-                <form id="login-form" action="<?=route_to('user') ?>">
+                <form id="login-form" method="POST" enctype="multipart/form-data" action="<?=route_to('User') ?>"  style="display: 
+                    <?php if( ($showError == null && $signedIn == null) ){ 
+                            if( $session->getFlashdata('signedIn') != NULL && 
+                                $session->getFlashdata('signedIn') == 'false' && 
+                                $session->getFlashdata('showError') != NULL && 
+                                $session->getFlashdata('showError') == 'true' && 
+                                $session->getFlashdata('usedForm') != 'login'  ){
+                                        echo 'none !important;';
+                            }else{
+                                echo 'block !important;';
+                            }
+                        }else{
+                            echo 'none !important;';
+                        }?>">
                     <div class="modal-body">
-                        <div id="div-login-msg">
-                            <div id="icon-login-msg" class="glyphicon glyphicon-chevron-right"></div>
-                            <span id="text-login-msg">Type your username and password.</span>
-                        </div>
-                        <input id="login_username" class="form-control" type="text" placeholder="Username" required>
-                        <input id="login_password" class="form-control" type="password" placeholder="Password" required>
+                        
+                        <input id="login_username" name="strUserName" class="form-control" type="text" placeholder="Username" required>
+                        <input id="login_password" name="strPassWord" class="form-control" type="password" placeholder="Password" required>
                         <div class="checkbox">
                             <label>
                                 <input type="checkbox"> Remember me
@@ -123,15 +158,20 @@
                 <!-- End # Login Form -->
                 
                 <!-- Begin | Change Password Form -->
-                <form id="change-form" style="display:none;">
+                <form id="change-form" method="POST" enctype="multipart/form-data" action="<?=route_to('changepass') ?>"  style="display: 
+                    <?php if( $session->getFlashdata('signedIn') != NULL && $session->getFlashdata('signedIn') == 'true' ){
+                            if($session->getFlashdata('showError') != NULL && $session->getFlashdata('showError') == 'true' && ($session->getFlashdata('usedForm') == 'register' || $session->getFlashdata('usedForm') == 'lost' || $session->getFlashdata('usedForm') == 'login') ){
+                                echo 'none !important;';}else{echo 'block !important;';}
+                            }else{echo 'none !important;';}?>">
+                <!-- <form id="change-form" style="display:none;"> -->
                     <div class="modal-body">
-                        <div id="div-change-msg">
+                        <!-- <div id="div-change-msg">
                             <div id="icon-change-msg" class="glyphicon glyphicon-chevron-right"></div>
                             <span id="text-change-msg">Type your passwords.</span>
-                        </div>
-                        <input id="change_id" class="form-control" type="hidden" value="<?=$userID?>">
-                        <input id="change_npassword" class="form-control" type="password" placeholder="New Password" required>
-                        <input id="change_cpassword" class="form-control" type="password" placeholder="Confirm Password" required>
+                        </div> -->
+                        <input id="change_id" name="id" class="form-control" type="hidden" value="<?=$userID?>">
+                        <input id="change_npassword" name="npassword"  class="form-control" type="password" placeholder="New Password" required>
+                        <input id="change_cpassword" name="cpassword" class="form-control" type="password" placeholder="Confirm Password" required>
 
                     </div>
                     <div class="modal-footer">
@@ -143,13 +183,14 @@
                 <!-- End | Change Password Form -->
 
                 <!-- Begin | Lost Password Form -->
-                <form id="lost-form" style="display:none;">
+                <form id="lost-form" method="POST" enctype="multipart/form-data" action="<?=route_to('userlost') ?>" style="display: <?php if( $session->getFlashdata('signedIn') != NULL && $session->getFlashdata('signedIn') == 'false' && $session->getFlashdata('showError') != NULL && $session->getFlashdata('showError') == 'true' && $session->getFlashdata('usedForm') == 'lost' ){echo 'block !important';}else{echo 'none !important';}  ?>">
+                <!-- <form id="lost-form" style="display:none;"> -->
                     <div class="modal-body">
-                        <div id="div-lost-msg">
+                        <!-- <div id="div-lost-msg">
                             <div id="icon-lost-msg" class="glyphicon glyphicon-chevron-right"></div>
                             <span id="text-lost-msg">Type your e-mail.</span>
-                        </div>
-                        <input id="lost_email" class="form-control" type="text" placeholder="E-Mail" required>
+                        </div> -->
+                        <input id="lost_email" name="strEmail" class="form-control" type="text" placeholder="E-Mail" required>
                     </div>
                     <div class="modal-footer">
                         <div>
@@ -164,17 +205,20 @@
                 <!-- End | Lost Password Form -->
                 
                 <!-- Begin | Register Form -->
-                <form id="register-form" style="display:none;">
+                
+                <form id="register-form" method="POST" enctype="multipart/form-data" action="<?=route_to('usersnew') ?>" style="display: <?php if( $session->getFlashdata('signedIn') != NULL && $session->getFlashdata('signedIn') == 'false' && $session->getFlashdata('showError') != NULL && $session->getFlashdata('showError') == 'true' && $session->getFlashdata('usedForm') == 'register' ){echo 'block !important';}else{echo 'none !important';}  ?>">
+                <!-- <form id="register-form" style="display:none;"> -->
                     <div class="modal-body">
-                        <div id="div-register-msg">
+                        
+                        <!-- <div id="div-register-msg">
                             <div id="icon-register-msg" class="glyphicon glyphicon-chevron-right"></div>
                             <span id="text-register-msg">Register an account.</span>
-                        </div>
-                        <input id="register_fullname" class="form-control" type="text" placeholder="Full Name" required>
-                        <input id="register_age" class="form-control" type="text" placeholder="Age" required>
-                        <input id="register_username" class="form-control" type="text" placeholder="Username" required>
-                        <input id="register_email" class="form-control" type="text" placeholder="E-Mail" required>
-                        <input id="register_password" class="form-control" type="password" placeholder="Password" required>
+                        </div> -->
+                        <input name="strFullName" value="<?= old('strFullName') ?>"class="form-control" type="text" placeholder="Full Name" required>
+                        <input name="intAge" value="<?= old('intAge') ?>"class="form-control" type="text" placeholder="Age" required>
+                        <input name="strUserName" value="<?= old('strUserName') ?>"class="form-control" type="text" placeholder="Username" required>
+                        <input name="strEmail" value="<?= old('strEmail') ?>"class="form-control" type="text" placeholder="E-Mail" required>
+                        <input name="strPassWord" class="form-control" type="password" placeholder="Password" required>
                     </div>
                     <div class="modal-footer">
                         <div>
