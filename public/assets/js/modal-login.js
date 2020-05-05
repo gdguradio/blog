@@ -202,6 +202,11 @@
     //     $('#login-modal').attr('style','opacity:1 !important')
     //     modalAnimate($formLogin, $formChange); 
     // });
+
+    $('#closemodal').click(function() {
+        console.log("qwe")
+        $('#login-modal').modal('hide');
+    });
     function modalAnimate1 ($oldForm, $newForm) {
         $(".error,.success").hide();
         var $oldH = $oldForm.height() > 0 ? $oldForm.height() : '350px';

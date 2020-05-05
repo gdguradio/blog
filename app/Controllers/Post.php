@@ -37,6 +37,13 @@ class Post extends BaseController
 		$data['email'] = $this->session->get('email');
         $data['role'] = $this->session->get('role');
         $data['userID'] = $this->session->get('userID');
+        if($this->session->get('userID') != null){
+			$data['showError'] = $this->session->get('showError');
+			$data['signedIn'] = $this->session->get('signedIn');
+		}else{
+			$data['showError'] = null;
+			$data['signedIn'] = null;
+		}
         $this->viewRender('postlist',$data);
 
     }
@@ -70,6 +77,13 @@ class Post extends BaseController
             $data['email'] = $this->session->get('email');
             $data['role'] = $this->session->get('role');
             $data['userID'] = $this->session->get('userID');
+            if($this->session->get('userID') != null){
+                $data['showError'] = $this->session->get('showError');
+                $data['signedIn'] = $this->session->get('signedIn');
+            }else{
+                $data['showError'] = null;
+                $data['signedIn'] = null;
+            }
             // $data['postid'] = $this->session->get('id');
             return $this->viewRender('post',$data);
 
@@ -91,6 +105,13 @@ class Post extends BaseController
 		$data['email'] = $this->session->get('email');
         $data['role'] = $this->session->get('role');
         $data['userID'] = $this->session->get('userID');
+        if($this->session->get('userID') != null){
+			$data['showError'] = $this->session->get('showError');
+			$data['signedIn'] = $this->session->get('signedIn');
+		}else{
+			$data['showError'] = null;
+			$data['signedIn'] = null;
+		}
         $this->viewRender('post',$data);
 
     }
@@ -330,6 +351,13 @@ class Post extends BaseController
             $data['email'] = $this->session->get('email');
             $data['role'] = $this->session->get('role');
             $data['userID'] = $this->session->get('userID');
+            if($this->session->get('userID') != null){
+                $data['showError'] = $this->session->get('showError');
+                $data['signedIn'] = $this->session->get('signedIn');
+            }else{
+                $data['showError'] = null;
+                $data['signedIn'] = null;
+            }
             return $this->viewRender('viewpost',$data);
 
         }else

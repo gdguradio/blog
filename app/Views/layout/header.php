@@ -30,7 +30,8 @@
   <link rel="stylesheet" href="<?php echo base_url('assets/css/style.css'); ?>">
   <script src="<?php echo base_url('assets/js/jquery.min.js'); ?>"></script>
   <script type="text/javascript">var site_url = "<?php echo site_url();?>";</script>
-
+  <script src="<?php echo base_url('assets/jquery/jquery.min.js'); ?>"></script>
+  <script src="<?php echo base_url('assets/bootstrap/js/bootstrap.bundle.min.js'); ?>"></script>
     <style>
         .disabled {
             pointer-events: none;
@@ -84,12 +85,12 @@
     </div>
   </nav>
 <!-- BEGIN # MODAL LOGIN -->
-<div class="modal fade" id="login-modal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true" style="display: <?php if( $session->getFlashdata('signedIn') != NULL && $session->getFlashdata('showError') != NULL && $session->getFlashdata('showError') == 'true' ){echo 'block !important;';}else{echo 'none !important;';} echo 'opacity:1 !important;';  ?>">
+<div class="modal fade" id="login-modal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true" style="display: <?php if( $session->getFlashdata('signedIn') != NULL && $session->getFlashdata('showError') != NULL && $session->getFlashdata('showError') == 'true' ){echo 'block ;';}else{echo 'none !important;';} echo 'opacity:1 !important;';  ?>">
     <div class="modal-dialog">
         <div class="modal-content">
             <div class="modal-header" align="center">
                 <center><img class="img-circle" id="img_logo" src="<?php echo base_url('assets/img/logo.jpg'); ?>"></center>
-                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                <button type="button" id="closemodal" class="close" data-dismiss="modal" aria-label="Close">
                     <span class="glyphicon glyphicon-remove" aria-hidden="true"></span> X
                 </button>
             </div>

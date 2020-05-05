@@ -48,7 +48,13 @@ class Register extends BaseController
 		$data['email'] = $this->session->get('email');
         $data['role'] = $this->session->get('role');
         $data['userID'] = $this->session->get('userID');
-        
+        if($this->session->get('userID') != null){
+			$data['showError'] = $this->session->get('showError');
+			$data['signedIn'] = $this->session->get('signedIn');
+		}else{
+			$data['showError'] = null;
+			$data['signedIn'] = null;
+		}
         $this->viewRender('newregister',$data);
 
     }
